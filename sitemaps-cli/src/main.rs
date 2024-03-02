@@ -26,8 +26,7 @@ fn main() -> Result<(), SitemapError> {
     Ok(())
 }
 
-// TODO: get rid of all unwraps!
-// don't print column if None
+// TODO: get rid of all unwraps?
 fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     let mut header = vec![];
     let mut header_flags = [false; HEADER_COUNT];
@@ -72,27 +71,35 @@ fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     }
 
     if cli.pretty {
-        let mut table = Table::new();
-
-        table.set_header(header);
-
-        for row in rows {
-            table.add_row(row);
-        }
-
-        format!("{table}")
+        pretty(header, rows)
     } else {
-        let mut tw = TabWriter::new(vec![]);
-
-        let lines = rows
-            .iter()
-            .map(|row| row.join("\t"))
-            .collect::<Vec<String>>();
-        let buf = lines.join("\n");
-
-        tw.write_all(buf.as_bytes()).unwrap();
-        tw.flush().unwrap();
-
-        String::from_utf8(tw.into_inner().unwrap()).unwrap()
+        plain(header, rows)
     }
+}
+
+fn pretty(header: Vec<&str>, rows: Vec<Vec<String>>) -> String {
+    let mut table = Table::new();
+
+    table.set_header(header);
+
+    for row in rows {
+        table.add_row(row);
+    }
+
+    format!("{table}")
+}
+
+fn plain(_header: Vec<&str>, rows: Vec<Vec<String>>) -> String {
+    let mut tw = TabWriter::new(vec![]);
+
+    let lines = rows
+        .iter()
+        .map(|row| row.join("\t"))
+        .collect::<Vec<String>>();
+    let buf = lines.join("\n");
+
+    tw.write_all(buf.as_bytes()).unwrap();
+    tw.flush().unwrap();
+
+    String::from_utf8(tw.into_inner().unwrap()).unwrap()
 }
