@@ -1,6 +1,6 @@
 pub mod error;
 pub mod reader;
-mod sitemap;
+pub mod sitemap;
 pub mod w3c_datetime;
 
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
