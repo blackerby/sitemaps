@@ -1,7 +1,6 @@
 use core::fmt;
 
-use crate::error::SitemapError;
-use crate::w3c_datetime::W3CDateTime;
+use crate::{error::SitemapError, w3c_datetime::W3CDateTime};
 
 #[derive(Debug, PartialEq)]
 pub struct Sitemap {

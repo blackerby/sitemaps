@@ -147,7 +147,7 @@ mod tests {
 
     use super::*;
     use crate::sitemap::ChangeFreq;
-    use time::macros::date;
+    use chrono::prelude::*;
 
     #[test]
     fn test_parse_one_happy() -> Result<(), SitemapError> {
@@ -165,7 +165,7 @@ mod tests {
         );
         assert_eq!(
             sitemap.urlset.0[0].last_mod,
-            Some(W3CDateTime::Date(date!(2005 - 01 - 01)))
+            Some(W3CDateTime::Date("2005-01-01".parse::<NaiveDate>()?))
         );
         assert_eq!(sitemap.urlset.0[0].change_freq, Some(ChangeFreq::Monthly));
         assert_eq!(sitemap.urlset.0[0].priority, Some(Priority(0.8)));
@@ -189,7 +189,7 @@ mod tests {
         );
         assert_eq!(
             sitemap.urlset.0[1].last_mod,
-            Some(W3CDateTime::Date(date!(2006 - 01 - 01)))
+            Some(W3CDateTime::Date("2006-01-01".parse::<NaiveDate>()?))
         );
         assert_eq!(sitemap.urlset.0[1].change_freq, Some(ChangeFreq::Weekly));
         assert_eq!(sitemap.urlset.0[1].priority, Some(Priority(0.5)));
