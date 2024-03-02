@@ -10,6 +10,8 @@ use sitemaps::reader::SitemapReader;
 use sitemaps::sitemap::Sitemap;
 use tabwriter::TabWriter;
 
+const HEADER_COUNT: usize = 4;
+
 fn main() -> Result<(), SitemapError> {
     let cli = Cli::parse();
 
@@ -17,9 +19,9 @@ fn main() -> Result<(), SitemapError> {
         let sitemap = SitemapReader::read(&path)?;
 
         if cli.pretty {
-            let table = build_table(sitemap);
+            let table = build_table(sitemap, &cli);
 
-            print!("{table}");
+            println!("{table}");
         } else {
             let output = build_buffer(sitemap, &cli);
 
@@ -30,6 +32,8 @@ fn main() -> Result<(), SitemapError> {
     Ok(())
 }
 
+// TODO: get rid of all unwraps!
+// don't print column if None
 fn build_buffer(sitemap: Sitemap, cli: &Cli) -> String {
     let mut tw = TabWriter::new(vec![]);
 
@@ -37,9 +41,10 @@ fn build_buffer(sitemap: Sitemap, cli: &Cli) -> String {
 
     for url in &sitemap.urlset.0 {
         lines.push_str(&url.loc.to_string());
+        lines.push('\t');
 
         if cli.lastmod {
-            lines.push_str(&format!("\t{}\t", url.last_mod.unwrap()));
+            lines.push_str(&format!("{}\t", url.last_mod.unwrap()));
         }
 
         if cli.changefreq {
@@ -59,18 +64,102 @@ fn build_buffer(sitemap: Sitemap, cli: &Cli) -> String {
     String::from_utf8(tw.into_inner().unwrap()).unwrap()
 }
 
-fn build_table(sitemap: Sitemap) -> Table {
+fn build_table(sitemap: Sitemap, cli: &Cli) -> Table {
     let mut table = Table::new();
-    table.set_header(vec!["loc", "lastmod", "changefreq", "priority"]);
+    let mut header = vec![];
+    // table headers for pretty printing.
+    // from left to right: loc, lastmod, changefreq, priority
+    let mut header_flags = [false; HEADER_COUNT];
+    let headers = ["loc", "lastmod", "changefreq", "priority"];
 
-    for url in sitemap.urlset.0 {
-        table.add_row(vec![
-            url.loc,
-            url.last_mod.unwrap().to_string(),
-            url.change_freq.unwrap().to_string(),
-            url.priority.unwrap().to_string(),
-        ]);
+    for url in &sitemap.urlset.0 {
+        let mut row = vec![];
+        if cli.loc {
+            header_flags[0] = true;
+            row.push(url.loc.to_string());
+        }
+
+        if cli.lastmod {
+            if let Some(lastmod) = url.last_mod {
+                header_flags[1] = true;
+                row.push(lastmod.to_string());
+            }
+        }
+
+        if cli.changefreq {
+            if let Some(changefreq) = url.change_freq {
+                header_flags[2] = true;
+                row.push(changefreq.to_string());
+            }
+        }
+
+        if cli.priority {
+            if let Some(priority) = url.priority {
+                header_flags[3] = true;
+                row.push(priority.to_string());
+            }
+        }
+
+        table.add_row(row);
     }
+
+    for (i, &flag) in header_flags.iter().enumerate() {
+        if flag {
+            header.push(headers[i]);
+        }
+    }
+
+    table.set_header(header);
 
     table
 }
+
+// fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
+//     let mut header = vec![];
+//     let mut header_flags = [false; HEADER_COUNT];
+//     let headers = ["loc", "lastmod", "changefreq", "priority"];
+//     let mut rows = vec![];
+
+//     for url in sitemap.urlset.0 {
+//         let mut row = vec![];
+//         if cli.loc {
+//             header_flags[0] = true;
+//             row.push(url.loc.as_bytes());
+//         }
+
+//         if cli.lastmod {
+//             if let Some(lastmod) = url.last_mod {
+//                 header_flags[1] = true;
+//                 row.push(lastmod.to_string().as_bytes());
+//             }
+//         }
+
+//         if cli.changefreq {
+//             if let Some(changefreq) = url.change_freq {
+//                 header_flags[2] = true;
+//                 row.push(changefreq.to_string().as_bytes());
+//             }
+//         }
+
+//         if cli.priority {
+//             if let Some(priority) = url.priority {
+//                 header_flags[3] = true;
+//                 row.push(priority.to_string().as_bytes());
+//             }
+//         }
+
+//         rows.push(row);
+//     }
+
+//     for (i, &flag) in header_flags.iter().enumerate() {
+//         if flag {
+//             header.push(headers[i].as_bytes());
+//         }
+//     }
+
+//     if cli.pretty {
+//     } else {
+//     }
+
+//     String::new()
+// }
