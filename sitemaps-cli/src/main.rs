@@ -26,43 +26,11 @@ fn main() -> Result<(), SitemapError> {
     Ok(())
 }
 
-// TODO: get rid of all unwraps?
 fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     let mut header = vec![];
-    let mut header_flags = [false; HEADER_COUNT];
     let headers = ["loc", "lastmod", "changefreq", "priority"];
-    let mut rows = vec![];
 
-    for url in sitemap.urlset.0 {
-        let mut row = vec![];
-        if cli.loc {
-            header_flags[0] = true;
-            row.push(url.loc.to_string());
-        }
-
-        if cli.lastmod {
-            if let Some(lastmod) = url.last_mod {
-                header_flags[1] = true;
-                row.push(lastmod.to_string());
-            }
-        }
-
-        if cli.changefreq {
-            if let Some(changefreq) = url.change_freq {
-                header_flags[2] = true;
-                row.push(changefreq.to_string());
-            }
-        }
-
-        if cli.priority {
-            if let Some(priority) = url.priority {
-                header_flags[3] = true;
-                row.push(priority.to_string());
-            }
-        }
-
-        rows.push(row);
-    }
+    let (header_flags, rows) = build_rows(sitemap, cli);
 
     for (i, &flag) in header_flags.iter().enumerate() {
         if flag {
@@ -98,8 +66,48 @@ fn plain(_header: Vec<&str>, rows: Vec<Vec<String>>) -> String {
         .collect::<Vec<String>>();
     let buf = lines.join("\n");
 
+    // I am skeptical of these unwraps, but I think the logic used in
+    // `build_rows` might prevent panicking
     tw.write_all(buf.as_bytes()).unwrap();
     tw.flush().unwrap();
 
     String::from_utf8(tw.into_inner().unwrap()).unwrap()
+}
+
+fn build_rows(sitemap: Sitemap, cli: &Cli) -> ([bool; HEADER_COUNT], Vec<Vec<String>>) {
+    let mut header_flags = [false; HEADER_COUNT];
+    let mut rows = vec![];
+
+    for url in sitemap.urlset.0 {
+        let mut row = vec![];
+        if cli.loc {
+            header_flags[0] = true;
+            row.push(url.loc.to_string());
+        }
+
+        if cli.lastmod {
+            if let Some(lastmod) = url.last_mod {
+                header_flags[1] = true;
+                row.push(lastmod.to_string());
+            }
+        }
+
+        if cli.changefreq {
+            if let Some(changefreq) = url.change_freq {
+                header_flags[2] = true;
+                row.push(changefreq.to_string());
+            }
+        }
+
+        if cli.priority {
+            if let Some(priority) = url.priority {
+                header_flags[3] = true;
+                row.push(priority.to_string());
+            }
+        }
+
+        rows.push(row);
+    }
+
+    (header_flags, rows)
 }
