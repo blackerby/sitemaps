@@ -24,10 +24,9 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 - [x] add CLI
 - [x] remove `new` and instantiate SitemapReader from `read`
 - [x] tweak datetime display format
-- [ ] reimplement CLI output with good formatting
+- [x] reimplement CLI output with good formatting
   - comfy table with pretty print option?
   - tabwriter for everything else?
-  - investigate feature flagging for this
 - [ ] add CLI subcommand to filter on `<lastmod>`
 - [ ] use `thiserror`
 - [ ] add doc comments
@@ -40,4 +39,4 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
     - add ability to edit?
 - [ ] cli is getting pretty heavy. investigate:
   - [x] cargo workspaces
-  - [ ] feature flagging
+  - [ ] feature flagging comfy table
