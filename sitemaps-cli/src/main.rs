@@ -10,7 +10,10 @@ use sitemaps::reader::SitemapReader;
 use sitemaps::sitemap::Sitemap;
 use tabwriter::TabWriter;
 
-const HEADER_COUNT: usize = 4;
+const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
+
+struct Headers([bool; HEADERS.len()]);
+struct Rows(Vec<Vec<String>>);
 
 fn main() -> Result<(), SitemapError> {
     let cli = Cli::parse();
@@ -28,13 +31,12 @@ fn main() -> Result<(), SitemapError> {
 
 fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     let mut header = vec![];
-    let headers = ["loc", "lastmod", "changefreq", "priority"];
 
     let (header_flags, rows) = build_rows(sitemap, cli);
 
-    for (i, &flag) in header_flags.iter().enumerate() {
+    for (i, &flag) in header_flags.0.iter().enumerate() {
         if flag {
-            header.push(headers[i]);
+            header.push(HEADERS[i]);
         }
     }
 
@@ -45,22 +47,23 @@ fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     }
 }
 
-fn pretty(header: Vec<&str>, rows: Vec<Vec<String>>) -> String {
+fn pretty(header: Vec<&str>, rows: Rows) -> String {
     let mut table = Table::new();
 
     table.set_header(header);
 
-    for row in rows {
+    for row in rows.0 {
         table.add_row(row);
     }
 
     format!("{table}")
 }
 
-fn plain(_header: Vec<&str>, rows: Vec<Vec<String>>) -> String {
+fn plain(_header: Vec<&str>, rows: Rows) -> String {
     let mut tw = TabWriter::new(vec![]);
 
     let lines = rows
+        .0
         .iter()
         .map(|row| row.join("\t"))
         .collect::<Vec<String>>();
@@ -74,34 +77,34 @@ fn plain(_header: Vec<&str>, rows: Vec<Vec<String>>) -> String {
     String::from_utf8(tw.into_inner().unwrap()).unwrap()
 }
 
-fn build_rows(sitemap: Sitemap, cli: &Cli) -> ([bool; HEADER_COUNT], Vec<Vec<String>>) {
-    let mut header_flags = [false; HEADER_COUNT];
+fn build_rows(sitemap: Sitemap, cli: &Cli) -> (Headers, Rows) {
+    let mut header_flags = Headers([false; HEADERS.len()]);
     let mut rows = vec![];
 
     for url in sitemap.urlset.0 {
         let mut row = vec![];
         if cli.loc {
-            header_flags[0] = true;
+            header_flags.0[0] = true;
             row.push(url.loc.to_string());
         }
 
         if cli.lastmod {
             if let Some(lastmod) = url.last_mod {
-                header_flags[1] = true;
+                header_flags.0[1] = true;
                 row.push(lastmod.to_string());
             }
         }
 
         if cli.changefreq {
             if let Some(changefreq) = url.change_freq {
-                header_flags[2] = true;
+                header_flags.0[2] = true;
                 row.push(changefreq.to_string());
             }
         }
 
         if cli.priority {
             if let Some(priority) = url.priority {
-                header_flags[3] = true;
+                header_flags.0[3] = true;
                 row.push(priority.to_string());
             }
         }
@@ -109,5 +112,5 @@ fn build_rows(sitemap: Sitemap, cli: &Cli) -> ([bool; HEADER_COUNT], Vec<Vec<Str
         rows.push(row);
     }
 
-    (header_flags, rows)
+    (header_flags, Rows(rows))
 }
