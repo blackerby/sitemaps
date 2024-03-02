@@ -25,16 +25,13 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 - [x] remove `new` and instantiate SitemapReader from `read`
 - [x] tweak datetime display format
 - [x] reimplement CLI output with good formatting
+- [ ] sitemap index handling
 - [ ] add CLI subcommand to filter on `<lastmod>`
 - [ ] use `thiserror`
 - [ ] add doc comments
 - [ ] validate `urlset` namespace attribute?
-- [ ] sitemap index handling
 - [ ] serialization
   - json
   - csv
   - xml
     - add ability to edit?
-- [ ] cli is getting pretty heavy. investigate:
-  - [x] cargo workspaces
-  - [ ] feature flagging comfy table
