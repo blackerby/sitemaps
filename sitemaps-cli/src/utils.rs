@@ -16,10 +16,10 @@ pub(crate) fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     }
 }
 
-fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>, header: bool) -> String {
+fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>, show_header: bool) -> String {
     let mut table = Table::new();
 
-    if header {
+    if show_header {
         table.set_header(headers);
     }
 
@@ -30,7 +30,7 @@ fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>, header: bool) -> String {
     format!("{table}")
 }
 
-fn plain(_headers: Vec<&str>, rows: Vec<Vec<String>>, _header: bool) -> String {
+fn plain(headers: Vec<&str>, rows: Vec<Vec<String>>, show_header: bool) -> String {
     let mut tw = TabWriter::new(vec![]);
 
     let lines = rows
@@ -39,9 +39,15 @@ fn plain(_headers: Vec<&str>, rows: Vec<Vec<String>>, _header: bool) -> String {
         .collect::<Vec<String>>();
     let buf = lines.join("\n");
 
+    let output = if show_header {
+        format!("{}\n{}", headers.join("\t"), buf)
+    } else {
+        buf
+    };
+
     // I am skeptical of these unwraps, but I think the logic used in
     // `build_rows` might prevent panicking
-    tw.write_all(buf.as_bytes()).unwrap();
+    tw.write_all(output.as_bytes()).unwrap();
     tw.flush().unwrap();
 
     String::from_utf8(tw.into_inner().unwrap()).unwrap()
