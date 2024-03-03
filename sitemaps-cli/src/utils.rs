@@ -55,7 +55,7 @@ fn plain(headers: Vec<&str>, rows: Vec<Vec<String>>, show_header: bool) -> Strin
 
 fn transpose_columns(columns: Vec<Vec<String>>) -> Vec<Vec<String>> {
     // TODO: get rid of clone
-    (0..columns.len())
+    (0..columns[0].len())
         .map(|i| {
             columns
                 .iter()
@@ -77,6 +77,7 @@ fn build_headers_and_columns(sitemap: Sitemap, cli: &Cli) -> (Vec<&str>, Vec<Vec
             .iter()
             .map(|url| url.loc.to_string())
             .collect::<Vec<String>>();
+
         columns.push(locs);
     }
     if cli.lastmod && sitemap.urlset.0.iter().any(|url| url.last_mod.is_some()) {
@@ -93,6 +94,7 @@ fn build_headers_and_columns(sitemap: Sitemap, cli: &Cli) -> (Vec<&str>, Vec<Vec
                 }
             })
             .collect::<Vec<String>>();
+
         columns.push(lastmods);
     }
     if cli.changefreq && sitemap.urlset.0.iter().any(|url| url.change_freq.is_some()) {
@@ -109,6 +111,7 @@ fn build_headers_and_columns(sitemap: Sitemap, cli: &Cli) -> (Vec<&str>, Vec<Vec
                 }
             })
             .collect::<Vec<String>>();
+
         columns.push(changefreqs);
     }
     if cli.priority && sitemap.urlset.0.iter().any(|url| url.priority.is_some()) {
@@ -125,6 +128,7 @@ fn build_headers_and_columns(sitemap: Sitemap, cli: &Cli) -> (Vec<&str>, Vec<Vec
                 }
             })
             .collect::<Vec<String>>();
+
         columns.push(priorities);
     }
 

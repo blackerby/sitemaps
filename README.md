@@ -15,7 +15,6 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### Lib
 
-- [ ] read from stdin
 - [ ] sitemap index handling
 - [ ] use `thiserror`
 - [ ] add doc comments
@@ -29,3 +28,4 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 ### CLI
 
 - [ ] add CLI subcommand to filter on `<lastmod>`
+- [ ] test with `assert_cmd`

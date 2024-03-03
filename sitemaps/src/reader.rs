@@ -3,7 +3,8 @@ use crate::sitemap::{Priority, Sitemap, Url, Urlset};
 use crate::w3c_datetime::W3CDateTime;
 use crate::MAX_URL_LENGTH;
 use std::borrow::Cow;
-use std::fs;
+use std::io::Read;
+use std::{fs, io};
 
 use quick_xml::events::{BytesDecl, Event};
 use quick_xml::reader::Reader;
@@ -21,6 +22,10 @@ impl<'a> SitemapReader<'a> {
             path,
             contents: if let Ok(_) = WebUrl::parse(&path) {
                 ureq::get(&path).call()?.into_string()?
+            } else if path == "-" {
+                let mut buf = String::new();
+                io::stdin().read_to_string(&mut buf)?;
+                buf
             } else {
                 fs::read_to_string(&path)?
             },
