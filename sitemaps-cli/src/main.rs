@@ -12,10 +12,6 @@ use tabwriter::TabWriter;
 
 const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 
-struct Headers(Vec<&'static str>);
-struct Row(Vec<String>);
-struct Rows(Vec<Row>);
-
 fn main() -> Result<(), SitemapError> {
     let cli = Cli::parse();
 
@@ -40,25 +36,24 @@ fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     }
 }
 
-fn pretty(headers: Headers, rows: Rows) -> String {
+fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>) -> String {
     let mut table = Table::new();
 
-    table.set_header(headers.0);
+    table.set_header(headers);
 
-    for row in rows.0 {
-        table.add_row(row.0);
+    for row in rows {
+        table.add_row(row);
     }
 
     format!("{table}")
 }
 
-fn plain(_headers: Headers, rows: Rows) -> String {
+fn plain(_headers: Vec<&str>, rows: Vec<Vec<String>>) -> String {
     let mut tw = TabWriter::new(vec![]);
 
     let lines = rows
-        .0
         .iter()
-        .map(|row| row.0.join("\t"))
+        .map(|row| row.join("\t"))
         .collect::<Vec<String>>();
     let buf = lines.join("\n");
 
@@ -70,53 +65,78 @@ fn plain(_headers: Headers, rows: Rows) -> String {
     String::from_utf8(tw.into_inner().unwrap()).unwrap()
 }
 
-// TODO: reexamine the logic here. Checking the Cli flags and setting
-// the header flags on each URL seems inefficient
-fn build_rows(sitemap: Sitemap, cli: &Cli) -> (Headers, Rows) {
-    let mut rows = vec![];
-
+fn build_rows(sitemap: Sitemap, cli: &Cli) -> (Vec<&str>, Vec<Vec<String>>) {
     let mut headers = vec![];
+    let mut columns = vec![];
 
     if cli.loc {
         headers.push(HEADERS[0]);
+        let locs = sitemap
+            .urlset
+            .0
+            .iter()
+            .map(|url| url.loc.to_string())
+            .collect::<Vec<String>>();
+        columns.push(locs);
     }
     if cli.lastmod && sitemap.urlset.0.iter().any(|url| url.last_mod.is_some()) {
         headers.push(HEADERS[1]);
+        let lastmods = sitemap
+            .urlset
+            .0
+            .iter()
+            .map(|url| {
+                if let Some(lastmod) = url.last_mod {
+                    lastmod.to_string()
+                } else {
+                    String::new()
+                }
+            })
+            .collect::<Vec<String>>();
+        columns.push(lastmods);
     }
     if cli.changefreq && sitemap.urlset.0.iter().any(|url| url.change_freq.is_some()) {
         headers.push(HEADERS[2]);
+        let changefreqs = sitemap
+            .urlset
+            .0
+            .iter()
+            .map(|url| {
+                if let Some(changefreq) = url.change_freq {
+                    changefreq.to_string()
+                } else {
+                    String::new()
+                }
+            })
+            .collect::<Vec<String>>();
+        columns.push(changefreqs);
     }
     if cli.priority && sitemap.urlset.0.iter().any(|url| url.priority.is_some()) {
         headers.push(HEADERS[3]);
+        let priorities = sitemap
+            .urlset
+            .0
+            .iter()
+            .map(|url| {
+                if let Some(priority) = url.priority {
+                    priority.to_string()
+                } else {
+                    String::new()
+                }
+            })
+            .collect::<Vec<String>>();
+        columns.push(priorities);
     }
 
-    for url in sitemap.urlset.0 {
-        let mut row = Row(vec![]);
+    // TODO: get rid of clone
+    let rows = (0..columns.len())
+        .map(|i| {
+            columns
+                .iter()
+                .map(|c| c[i].clone())
+                .collect::<Vec<String>>()
+        })
+        .collect();
 
-        if cli.loc {
-            row.0.push(url.loc.to_string());
-        }
-
-        if cli.lastmod {
-            if let Some(lastmod) = url.last_mod {
-                row.0.push(lastmod.to_string());
-            }
-        }
-
-        if cli.changefreq {
-            if let Some(changefreq) = url.change_freq {
-                row.0.push(changefreq.to_string());
-            }
-        }
-
-        if cli.priority {
-            if let Some(priority) = url.priority {
-                row.0.push(priority.to_string());
-            }
-        }
-
-        rows.push(row);
-    }
-
-    (Headers(headers), Rows(rows))
+    (headers, rows)
 }
