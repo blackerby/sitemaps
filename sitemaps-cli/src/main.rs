@@ -12,8 +12,9 @@ use tabwriter::TabWriter;
 
 const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 
-struct Headers([bool; HEADERS.len()]);
-struct Rows(Vec<Vec<String>>);
+struct Headers(Vec<&'static str>);
+struct Row(Vec<String>);
+struct Rows(Vec<Row>);
 
 fn main() -> Result<(), SitemapError> {
     let cli = Cli::parse();
@@ -30,42 +31,34 @@ fn main() -> Result<(), SitemapError> {
 }
 
 fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
-    let mut header = vec![];
-
-    let (header_flags, rows) = build_rows(sitemap, cli);
-
-    for (i, &flag) in header_flags.0.iter().enumerate() {
-        if flag {
-            header.push(HEADERS[i]);
-        }
-    }
+    let (headers, rows) = build_rows(sitemap, cli);
 
     if cli.pretty {
-        pretty(header, rows)
+        pretty(headers, rows)
     } else {
-        plain(header, rows)
+        plain(headers, rows)
     }
 }
 
-fn pretty(header: Vec<&str>, rows: Rows) -> String {
+fn pretty(headers: Headers, rows: Rows) -> String {
     let mut table = Table::new();
 
-    table.set_header(header);
+    table.set_header(headers.0);
 
     for row in rows.0 {
-        table.add_row(row);
+        table.add_row(row.0);
     }
 
     format!("{table}")
 }
 
-fn plain(_header: Vec<&str>, rows: Rows) -> String {
+fn plain(_headers: Headers, rows: Rows) -> String {
     let mut tw = TabWriter::new(vec![]);
 
     let lines = rows
         .0
         .iter()
-        .map(|row| row.join("\t"))
+        .map(|row| row.0.join("\t"))
         .collect::<Vec<String>>();
     let buf = lines.join("\n");
 
@@ -77,40 +70,53 @@ fn plain(_header: Vec<&str>, rows: Rows) -> String {
     String::from_utf8(tw.into_inner().unwrap()).unwrap()
 }
 
+// TODO: reexamine the logic here. Checking the Cli flags and setting
+// the header flags on each URL seems inefficient
 fn build_rows(sitemap: Sitemap, cli: &Cli) -> (Headers, Rows) {
-    let mut header_flags = Headers([false; HEADERS.len()]);
     let mut rows = vec![];
 
+    let mut headers = vec![];
+
+    if cli.loc {
+        headers.push(HEADERS[0]);
+    }
+    if cli.lastmod && sitemap.urlset.0.iter().any(|url| url.last_mod.is_some()) {
+        headers.push(HEADERS[1]);
+    }
+    if cli.changefreq && sitemap.urlset.0.iter().any(|url| url.change_freq.is_some()) {
+        headers.push(HEADERS[2]);
+    }
+    if cli.priority && sitemap.urlset.0.iter().any(|url| url.priority.is_some()) {
+        headers.push(HEADERS[3]);
+    }
+
     for url in sitemap.urlset.0 {
-        let mut row = vec![];
+        let mut row = Row(vec![]);
+
         if cli.loc {
-            header_flags.0[0] = true;
-            row.push(url.loc.to_string());
+            row.0.push(url.loc.to_string());
         }
 
         if cli.lastmod {
             if let Some(lastmod) = url.last_mod {
-                header_flags.0[1] = true;
-                row.push(lastmod.to_string());
+                row.0.push(lastmod.to_string());
             }
         }
 
         if cli.changefreq {
             if let Some(changefreq) = url.change_freq {
-                header_flags.0[2] = true;
-                row.push(changefreq.to_string());
+                row.0.push(changefreq.to_string());
             }
         }
 
         if cli.priority {
             if let Some(priority) = url.priority {
-                header_flags.0[3] = true;
-                row.push(priority.to_string());
+                row.0.push(priority.to_string());
             }
         }
 
         rows.push(row);
     }
 
-    (header_flags, Rows(rows))
+    (Headers(headers), Rows(rows))
 }
