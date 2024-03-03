@@ -8,12 +8,14 @@ pub struct Cli {
     pub path: Option<String>,
     #[arg(short, long)]
     pub loc: bool,
-    #[arg(short = 'm', long)]
+    #[arg(short = 'L', long)]
     pub lastmod: bool,
     #[arg(short, long)]
     pub changefreq: bool,
     #[arg(short, long)]
     pub priority: bool,
-    #[arg(short = 'r', long)]
+    #[arg(short = 'P', long)]
     pub pretty: bool,
+    #[arg(short = 'H', long)]
+    pub header: bool,
 }

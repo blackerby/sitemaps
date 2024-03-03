@@ -10,16 +10,18 @@ pub(crate) fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
     let rows = transpose_columns(columns);
 
     if cli.pretty {
-        pretty(headers, rows)
+        pretty(headers, rows, cli.header)
     } else {
-        plain(headers, rows)
+        plain(headers, rows, cli.header)
     }
 }
 
-fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>) -> String {
+fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>, header: bool) -> String {
     let mut table = Table::new();
 
-    table.set_header(headers);
+    if header {
+        table.set_header(headers);
+    }
 
     for row in rows {
         table.add_row(row);
@@ -28,7 +30,7 @@ fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>) -> String {
     format!("{table}")
 }
 
-fn plain(_headers: Vec<&str>, rows: Vec<Vec<String>>) -> String {
+fn plain(_headers: Vec<&str>, rows: Vec<Vec<String>>, _header: bool) -> String {
     let mut tw = TabWriter::new(vec![]);
 
     let lines = rows
