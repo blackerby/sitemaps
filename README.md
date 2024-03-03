@@ -27,5 +27,4 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### CLI
 
-- [ ] add CLI subcommand to filter on `<lastmod>`
 - [ ] test with `assert_cmd`
