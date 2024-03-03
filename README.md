@@ -13,23 +13,10 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ## TODO (in no particular order)
 
-- [x] custom error type
-- [x] verify encoding
-- [x] URL validation for `<loc>`
-- [x] Priority validation
-- [x] validate `<loc>` length
-- [x] validate URL count
-- [x] read from the web
-- [x] proper datetime handling for `<lastmod>`
-- [x] add CLI
-- [x] remove `new` and instantiate SitemapReader from `read`
-- [x] tweak datetime display format
-- [x] reimplement CLI output with good formatting
-- [x] make showing header optional
-- [ ] show header for plain output
+### Lib
+
 - [ ] read from stdin
 - [ ] sitemap index handling
-- [ ] add CLI subcommand to filter on `<lastmod>`
 - [ ] use `thiserror`
 - [ ] add doc comments
 - [ ] validate `urlset` namespace attribute?
@@ -38,3 +25,7 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
   - csv
   - xml
     - add ability to edit?
+
+### CLI
+
+- [ ] add CLI subcommand to filter on `<lastmod>`
