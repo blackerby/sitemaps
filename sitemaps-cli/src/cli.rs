@@ -21,4 +21,6 @@ pub(crate) struct Cli {
     pub header: bool,
     #[arg(short, long)]
     pub json: bool,
+    #[arg(short = 'C', long)]
+    pub csv: bool,
 }

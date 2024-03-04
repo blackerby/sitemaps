@@ -16,7 +16,7 @@ fn main() -> Result<(), SitemapError> {
 
         let output = build_output(sitemap, &cli).unwrap();
 
-        println!("{output}");
+        println!("{}", output.trim_end());
     }
 
     Ok(())

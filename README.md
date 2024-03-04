@@ -20,9 +20,7 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 - [ ] add doc comments
 - [ ] validate `urlset` namespace attribute?
 - [ ] serialization
-  - json
-  - csv
-  - xml
+  - [ ] xml
     - add ability to edit?
 
 ### CLI

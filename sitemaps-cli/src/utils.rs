@@ -1,17 +1,25 @@
 use crate::cli::Cli;
 use comfy_table::Table;
+use csv::Writer;
 use serde_json;
 use sitemaps::sitemap::Sitemap;
-use std::io::Write;
+use std::{error::Error, io::Write};
 use tabwriter::TabWriter;
+
 const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 
+// TODO: move this serialization logic into the library and out of the cli
+// challenge will be removing the dependency on the Cli struct
 pub(crate) fn build_output(sitemap: Sitemap, cli: &Cli) -> Result<String, serde_json::Error> {
+    if cli.json {
+        return Ok(serde_json::to_string(&sitemap))?;
+    }
+
     let (headers, columns) = build_headers_and_columns(&sitemap, cli);
     let rows = transpose_columns(columns);
 
-    if cli.json {
-        return Ok(serde_json::to_string(&sitemap))?;
+    if cli.csv {
+        return Ok(write_csv(headers, rows).unwrap());
     }
 
     if cli.pretty {
@@ -141,4 +149,18 @@ fn build_headers_and_columns(
     }
 
     (headers, columns)
+}
+
+// TODO: tighten up this error handling
+fn write_csv(headers: Vec<&str>, rows: Vec<Vec<String>>) -> Result<String, Box<dyn Error>> {
+    let mut out = Writer::from_writer(vec![]);
+
+    out.serialize(headers)?;
+    for row in rows {
+        out.serialize(row)?;
+    }
+
+    out.flush()?;
+
+    Ok(String::from_utf8(out.into_inner()?)?)
 }
