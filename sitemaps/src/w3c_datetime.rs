@@ -1,10 +1,11 @@
 use chrono::{DateTime, FixedOffset, NaiveDate, ParseError};
+use serde::Serialize;
 use std::fmt;
 
 // https://developers.google.com/search/blog/2006/04/using-lastmod-attribute
 // https://www.w3.org/TR/NOTE-datetime
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum W3CDateTime {
     Date(NaiveDate),
     DateTime(DateTime<FixedOffset>),

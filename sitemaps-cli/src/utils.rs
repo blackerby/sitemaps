@@ -1,18 +1,23 @@
 use crate::cli::Cli;
 use comfy_table::Table;
+use serde_json;
 use sitemaps::sitemap::Sitemap;
 use std::io::Write;
 use tabwriter::TabWriter;
 const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 
-pub(crate) fn build_output(sitemap: Sitemap, cli: &Cli) -> String {
-    let (headers, columns) = build_headers_and_columns(sitemap, cli);
+pub(crate) fn build_output(sitemap: Sitemap, cli: &Cli) -> Result<String, serde_json::Error> {
+    let (headers, columns) = build_headers_and_columns(&sitemap, cli);
     let rows = transpose_columns(columns);
 
+    if cli.json {
+        return Ok(serde_json::to_string(&sitemap))?;
+    }
+
     if cli.pretty {
-        pretty(headers, rows, cli.header)
+        Ok(pretty(headers, rows, cli.header))
     } else {
-        plain(headers, rows, cli.header)
+        Ok(plain(headers, rows, cli.header))
     }
 }
 
@@ -65,7 +70,10 @@ fn transpose_columns(columns: Vec<Vec<String>>) -> Vec<Vec<String>> {
         .collect()
 }
 
-fn build_headers_and_columns(sitemap: Sitemap, cli: &Cli) -> (Vec<&str>, Vec<Vec<String>>) {
+fn build_headers_and_columns(
+    sitemap: &Sitemap,
+    cli: &Cli,
+) -> (Vec<&'static str>, Vec<Vec<String>>) {
     let mut headers = vec![];
     let mut columns = vec![];
 

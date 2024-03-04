@@ -10,3 +10,4 @@ clap = { version = "4.5.1", features = ["derive"] }
 sitemaps = { path = "../sitemaps" }
 comfy-table = "7.1.0"
 tabwriter = "1.4.0"
+serde_json = "1.0"

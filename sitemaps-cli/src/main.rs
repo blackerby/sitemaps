@@ -14,7 +14,7 @@ fn main() -> Result<(), SitemapError> {
     if let Some(ref path) = cli.path {
         let sitemap = SitemapReader::read(&path)?;
 
-        let output = build_output(sitemap, &cli);
+        let output = build_output(sitemap, &cli).unwrap();
 
         println!("{output}");
     }

@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4.34"
+chrono = {version = "0.4.34", features = ["serde"] }
 quick-xml = "0.31.0"
 ureq = "2.9.6"
 url = "2.5.0"
+serde = { version = "1.0", features = ["derive"] }

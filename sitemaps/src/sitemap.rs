@@ -1,19 +1,20 @@
 use core::fmt;
+use serde::Serialize;
 
 use crate::{error::SitemapError, w3c_datetime::W3CDateTime};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Sitemap {
     pub urlset: Urlset,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct Urlset(pub Vec<Url>);
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub struct Priority(pub f32);
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct Url {
     pub loc: String,
     pub last_mod: Option<W3CDateTime>,
@@ -46,7 +47,7 @@ impl Priority {
     }
 }
 
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum ChangeFreq {
     Always,
     Hourly,
