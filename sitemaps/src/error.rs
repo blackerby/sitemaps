@@ -2,7 +2,6 @@ use chrono::ParseError as ChronoParseError;
 use quick_xml::Error as XmlError;
 use std::io::Error as IoError;
 use std::num::ParseFloatError;
-use ureq::Error as HttpError;
 use url::ParseError as UrlParseError;
 
 #[derive(Debug)]
@@ -11,7 +10,6 @@ pub enum Error {
     IoError(IoError),
     ParsePriorityError(ParseFloatError),
     EncodingError,
-    HttpError(HttpError),
     UrlParseError(UrlParseError),
     TooManyUrls,
     UrlValueTooLong,
@@ -35,12 +33,6 @@ impl From<IoError> for Error {
 impl From<ParseFloatError> for Error {
     fn from(value: ParseFloatError) -> Self {
         Error::ParsePriorityError(value)
-    }
-}
-
-impl From<HttpError> for Error {
-    fn from(value: HttpError) -> Self {
-        Error::HttpError(value)
     }
 }
 
