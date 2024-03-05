@@ -3,26 +3,39 @@ use serde::Serialize;
 
 use crate::{error::SitemapError, w3c_datetime::W3CDateTime};
 
+/// A Sitemap is an entity-escaped, UTF-8 encoded list of `<url>` elements contained in
+/// in a `<urlset>` element.
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Sitemap {
+    /// The set of URLs in the sitemap.
     pub urlset: Urlset,
 }
 
+/// `<urlset>` is the XML root element. Here it is represented as a list of URLs.
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Urlset(pub Vec<Url>);
 
+/// The priority of this URL relative to other URLs on the site.
+/// Valid values range from 0.0 to 1.0.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub struct Priority(pub f32);
 
+/// A URL entry. It is a parent XML tag containing the required `<loc>` element
+/// and the three optional `<lastmod>`, `<changrefreq>`, and `<priority>` elements.
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct Url {
+    /// The URL of the described page. It is required.
     pub loc: String,
+    /// The optional date of last modification of the page.
     pub last_mod: Option<W3CDateTime>,
+    /// Optional. How frequently the page is likely to change.
     pub change_freq: Option<ChangeFreq>,
+    /// Optional. The priority of this URL relative to other URLs on the site.
     pub priority: Option<Priority>,
 }
 
 impl Url {
+    /// Create a new, empty Url.
     pub fn new() -> Self {
         Self {
             loc: String::new(),
@@ -34,6 +47,7 @@ impl Url {
 }
 
 impl Priority {
+    /// Create a new, valid Priority.
     pub fn new(priority: f32) -> Result<Self, SitemapError> {
         if priority < 0.0 {
             return Err(SitemapError::PriorityTooLow);
@@ -47,6 +61,7 @@ impl Priority {
     }
 }
 
+/// ChangeFreq represents how frequently the page is likely to change.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum ChangeFreq {
     Always,
