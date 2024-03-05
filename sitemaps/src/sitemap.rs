@@ -40,51 +40,62 @@ impl Sitemap {
                     Err(err) => return Err(err),
                     Ok(()) => {}
                 },
-                Ok(Event::Start(start)) => loop {
-                    match reader.read_event_into(&mut nested_buf) {
-                        Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-                        Ok(Event::Start(e)) => {
-                            if e.name().as_ref() == b"url" {
-                                continue 'outer;
-                            }
-                        }
-                        Ok(Event::Text(e)) => {
-                            let text = e.unescape()?.to_string();
-                            match start.name().as_ref() {
-                                b"loc" => {
-                                    url.loc.push_str(&text);
-                                }
-                                b"lastmod" => {
-                                    url.last_mod = Some(W3CDateTime::parse(&text)?);
-                                }
-                                b"priority" => {
-                                    let priority = Priority::new(text.parse()?)?;
-                                    url.priority = Some(priority);
-                                }
-                                b"changefreq" => {
-                                    url.change_freq = Some(text.to_string().into());
-                                }
-                                _ => {}
-                            }
-                        }
-                        Ok(Event::End(e)) => {
-                            if e.name().as_ref() == b"url" {
-                                url_count += 1;
-
-                                if url_count > 50_000 {
-                                    return Err(Error::TooManyUrls);
-                                }
-
-                                sitemap.urlset.0.push(url);
-                                url = UrlEntry::new();
-                            }
-
-                            if e.name().as_ref() == b"urlset" {
-                                break;
-                            }
-                        }
-                        _ => {}
+                Ok(Event::Start(start)) => {
+                    if start.name().as_ref() == b"urlset" {
+                        continue 'outer;
                     }
+                    
+                    'inner: loop {
+                        match reader.read_event_into(&mut nested_buf) {
+                            Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+                            Ok(Event::Start(e)) => {
+                                if e.name().as_ref() == b"url" {
+                                    nested_buf.clear();
+                                    buf.clear();
+                                    continue 'outer;
+                                } else {
+                                    nested_buf.clear();
+                                    continue 'inner;
+                                }
+                            }
+                            Ok(Event::Text(e)) => {
+                                let text = e.unescape()?.to_string();
+                                match start.name().as_ref() {
+                                    b"loc" => {
+                                        url.loc.push_str(&text);
+                                    }
+                                    b"lastmod" => {
+                                        url.last_mod = Some(W3CDateTime::parse(&text)?);
+                                    }
+                                    b"priority" => {
+                                        let priority = Priority::new(text.parse()?)?;
+                                        url.priority = Some(priority);
+                                    }
+                                    b"changefreq" => {
+                                        url.change_freq = Some(text.to_string().into());
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            Ok(Event::End(e)) => {
+                                if e.name().as_ref() == b"url" {
+                                    url_count += 1;
+    
+                                    if url_count > 50_000 {
+                                        return Err(Error::TooManyUrls);
+                                    }
+    
+                                    sitemap.urlset.0.push(url);
+                                    url = UrlEntry::new();
+                                }
+    
+                                if e.name().as_ref() == b"urlset" {
+                                    break;
+                                }
+                            }
+                            _ => {}
+                        }
+                    }    
                 },
                 _ => {}
             }
