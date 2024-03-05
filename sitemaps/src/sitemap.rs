@@ -46,21 +46,16 @@ impl Sitemap {
                         let text = e.unescape()?.to_string();
                         match start.name().as_ref() {
                             b"loc" => {
-                                println!("{:?}", start.name());
-                                println!("{text}");
                                 url.loc.push_str(&text);
                             }
                             b"lastmod" => {
-                                println!("{:?}", start.name());
                                 url.last_mod = Some(W3CDateTime::parse(&text)?);
                             }
                             b"priority" => {
-                                println!("{:?}", start.name());
                                 let priority = Priority::new(text.parse()?)?;
                                 url.priority = Some(priority);
                             }
                             b"changefreq" => {
-                                println!("{:?}", start.name());
                                 url.change_freq = Some(text.to_string().into());
                             }
                             _ => {}
@@ -78,11 +73,11 @@ impl Sitemap {
 
                         sitemap.urlset.0.push(url);
                         url = UrlEntry::new();
-                        buf.clear();
                     }
                 }
                 _ => {}
             }
+            buf.clear();
         }
         Ok(sitemap)
     }
