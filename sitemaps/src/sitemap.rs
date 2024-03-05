@@ -1,7 +1,7 @@
 use core::fmt;
 use serde::Serialize;
 
-use crate::{error::SitemapError, w3c_datetime::W3CDateTime};
+use crate::{error::Error, w3c_datetime::W3CDateTime};
 
 /// A Sitemap is an entity-escaped, UTF-8 encoded list of `<url>` elements contained in
 /// in a `<urlset>` element.
@@ -48,13 +48,13 @@ impl Url {
 
 impl Priority {
     /// Create a new, valid Priority.
-    pub fn new(priority: f32) -> Result<Self, SitemapError> {
+    pub fn new(priority: f32) -> Result<Self, Error> {
         if priority < 0.0 {
-            return Err(SitemapError::PriorityTooLow);
+            return Err(Error::PriorityTooLow);
         }
 
         if priority > 1.0 {
-            return Err(SitemapError::PriorityTooHigh);
+            return Err(Error::PriorityTooHigh);
         }
 
         Ok(Self(priority))

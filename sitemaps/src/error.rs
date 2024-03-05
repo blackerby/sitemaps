@@ -6,7 +6,7 @@ use ureq::Error as HttpError;
 use url::ParseError as UrlParseError;
 
 #[derive(Debug)]
-pub enum SitemapError {
+pub enum Error {
     XmlError(XmlError),
     IoError(IoError),
     ParsePriorityError(ParseFloatError),
@@ -20,38 +20,38 @@ pub enum SitemapError {
     W3CDatetimeParseError(ChronoParseError),
 }
 
-impl From<XmlError> for SitemapError {
+impl From<XmlError> for Error {
     fn from(value: XmlError) -> Self {
-        SitemapError::XmlError(value)
+        Error::XmlError(value)
     }
 }
 
-impl From<IoError> for SitemapError {
+impl From<IoError> for Error {
     fn from(value: IoError) -> Self {
-        SitemapError::IoError(value)
+        Error::IoError(value)
     }
 }
 
-impl From<ParseFloatError> for SitemapError {
+impl From<ParseFloatError> for Error {
     fn from(value: ParseFloatError) -> Self {
-        SitemapError::ParsePriorityError(value)
+        Error::ParsePriorityError(value)
     }
 }
 
-impl From<HttpError> for SitemapError {
+impl From<HttpError> for Error {
     fn from(value: HttpError) -> Self {
-        SitemapError::HttpError(value)
+        Error::HttpError(value)
     }
 }
 
-impl From<ChronoParseError> for SitemapError {
+impl From<ChronoParseError> for Error {
     fn from(value: ChronoParseError) -> Self {
-        SitemapError::W3CDatetimeParseError(value)
+        Error::W3CDatetimeParseError(value)
     }
 }
 
-impl From<UrlParseError> for SitemapError {
+impl From<UrlParseError> for Error {
     fn from(value: UrlParseError) -> Self {
-        SitemapError::UrlParseError(value)
+        Error::UrlParseError(value)
     }
 }

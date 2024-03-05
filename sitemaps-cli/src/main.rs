@@ -5,10 +5,10 @@ use crate::cli::Cli;
 use crate::utils::build_output;
 use clap::Parser;
 
-use sitemaps::error::SitemapError;
+use sitemaps::error::Error;
 use sitemaps::reader::SitemapReader;
 
-fn main() -> Result<(), SitemapError> {
+fn main() -> Result<(), Error> {
     let cli = Cli::parse();
 
     if let Some(ref path) = cli.path {

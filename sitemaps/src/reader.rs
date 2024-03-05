@@ -1,4 +1,4 @@
-use crate::error::SitemapError;
+use crate::error::Error;
 use crate::sitemap::{Priority, Sitemap, Url, Urlset};
 use crate::w3c_datetime::W3CDateTime;
 use crate::MAX_URL_LENGTH;
@@ -17,7 +17,7 @@ pub struct SitemapReader<'a> {
 }
 
 impl<'a> SitemapReader<'a> {
-    fn new(path: &'a str) -> Result<SitemapReader, SitemapError> {
+    fn new(path: &'a str) -> Result<SitemapReader, Error> {
         Ok(Self {
             path,
             contents: if let Ok(_) = WebUrl::parse(&path) {
@@ -32,13 +32,13 @@ impl<'a> SitemapReader<'a> {
         })
     }
 
-    pub fn read(path: &'a str) -> Result<Sitemap, SitemapError> {
+    pub fn read(path: &'a str) -> Result<Sitemap, Error> {
         let reader = Self::new(path)?;
 
         reader.parse()
     }
 
-    fn parse(&self) -> Result<Sitemap, SitemapError> {
+    fn parse(&self) -> Result<Sitemap, Error> {
         let mut sitemap = Sitemap {
             urlset: Urlset(vec![]),
         };
@@ -82,7 +82,7 @@ impl<'a> SitemapReader<'a> {
                         url_count += 1;
 
                         if url_count > 50_000 {
-                            return Err(SitemapError::TooManyUrls);
+                            return Err(Error::TooManyUrls);
                         }
 
                         sitemap.urlset.0.push(url);
@@ -96,24 +96,24 @@ impl<'a> SitemapReader<'a> {
         Ok(sitemap)
     }
 
-    fn check_encoding(e: BytesDecl) -> Result<(), SitemapError> {
+    fn check_encoding(e: BytesDecl) -> Result<(), Error> {
         let encoding = e.encoding();
 
         if encoding.is_none() {
-            return Err(SitemapError::EncodingError);
+            return Err(Error::EncodingError);
         }
 
         if let Some(Ok(Cow::Borrowed(encoding))) = encoding {
             if encoding.to_ascii_lowercase() != b"utf-8" {
-                return Err(SitemapError::EncodingError);
+                return Err(Error::EncodingError);
             }
         }
         Ok(())
     }
 
-    fn validate_url(string: &str) -> Result<String, SitemapError> {
+    fn validate_url(string: &str) -> Result<String, Error> {
         if string.chars().count() > MAX_URL_LENGTH {
-            return Err(SitemapError::UrlValueTooLong);
+            return Err(Error::UrlValueTooLong);
         }
 
         let url = WebUrl::parse(string)?;
@@ -155,7 +155,7 @@ mod tests {
     use chrono::prelude::*;
 
     #[test]
-    fn test_parse_one_happy() -> Result<(), SitemapError> {
+    fn test_parse_one_happy() -> Result<(), Error> {
         let reader = SitemapReader {
             path: "",
             contents: ONE_URL.to_string(),
@@ -179,7 +179,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_two_happy() -> Result<(), SitemapError> {
+    fn test_parse_two_happy() -> Result<(), Error> {
         let reader = SitemapReader {
             path: "",
             contents: TWO_URLS.to_string(),
@@ -203,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_external_happy() -> Result<(), SitemapError> {
+    fn test_parse_external_happy() -> Result<(), Error> {
         let url = "https://www.govinfo.gov/sitemap/bulkdata/PLAW/117pvtl/sitemap.xml";
 
         let sitemap = SitemapReader::read(url)?;
