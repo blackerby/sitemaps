@@ -56,7 +56,7 @@ fn test_parse_two_happy() -> Result<(), Error> {
 fn test_parse_external_happy() -> Result<(), Error> {
     let url = "https://www.govinfo.gov/sitemap/bulkdata/PLAW/117pvtl/sitemap.xml";
 
-    let content = ureq::get(&url).call().unwrap().into_reader();
+    let content = ureq::get(url).call().unwrap().into_reader();
     let reader = BufReader::new(content);
 
     let sitemap = Sitemap::read_from(reader).unwrap();
