@@ -42,21 +42,20 @@ impl Sitemap {
 
                     loop {
                         match reader.read_event_into(&mut nested_buf) {
-                            Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-                            Ok(Event::Start(e)) => {
-                                if e.name().as_ref() == b"url" {
-                                    nested_buf.clear();
-                                    buf.clear();
-                                    break;
-                                }
+                            Err(e) => {
+                                panic!("Error at position {}: {:?}", reader.buffer_position(), e)
                             }
                             Ok(Event::Text(e)) => {
                                 let text = e.unescape()?.to_string();
                                 match start.name().as_ref() {
                                     b"loc" => url.loc.push_str(&text),
                                     b"lastmod" => url.last_mod = Some(W3CDateTime::parse(&text)?),
-                                    b"priority" => url.priority = Some(Priority::new(text.parse()?)?),
-                                    b"changefreq" => url.change_freq = Some(text.to_string().into()),
+                                    b"priority" => {
+                                        url.priority = Some(Priority::new(text.parse()?)?)
+                                    }
+                                    b"changefreq" => {
+                                        url.change_freq = Some(text.to_string().into())
+                                    }
                                     _ => {}
                                 }
                             }
@@ -80,7 +79,6 @@ impl Sitemap {
             }
             buf.clear();
         }
-        println!("{:#?}", sitemap);
         Ok(sitemap)
     }
 
