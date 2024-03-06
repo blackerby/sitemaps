@@ -41,10 +41,6 @@ impl Sitemap {
                     Ok(()) => {}
                 },
                 Ok(Event::Start(start)) => {
-                    if start.name().as_ref() == b"urlset" {
-                        continue 'outer;
-                    }
-                    
                     'inner: loop {
                         match reader.read_event_into(&mut nested_buf) {
                             Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
@@ -53,9 +49,6 @@ impl Sitemap {
                                     nested_buf.clear();
                                     buf.clear();
                                     continue 'outer;
-                                } else {
-                                    nested_buf.clear();
-                                    continue 'inner;
                                 }
                             }
                             Ok(Event::Text(e)) => {
