@@ -36,34 +36,27 @@ impl Sitemap {
                 Ok(Event::Eof) => break,
                 Ok(Event::Decl(e)) => Self::check_encoding(e)?,
                 Ok(Event::Start(start)) => {
+                    if start.name().as_ref() == b"url" {
+                        continue;
+                    }
+
                     loop {
                         match reader.read_event_into(&mut nested_buf) {
-                            Err(e) => {
-                                panic!("Error at position {}: {:?}", reader.buffer_position(), e)
-                            }
+                            Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
                             Ok(Event::Start(e)) => {
                                 if e.name().as_ref() == b"url" {
                                     nested_buf.clear();
                                     buf.clear();
-                                    break; // continue 'outer;
+                                    break;
                                 }
                             }
                             Ok(Event::Text(e)) => {
                                 let text = e.unescape()?.to_string();
                                 match start.name().as_ref() {
-                                    b"loc" => {
-                                        url.loc.push_str(&text);
-                                    }
-                                    b"lastmod" => {
-                                        url.last_mod = Some(W3CDateTime::parse(&text)?);
-                                    }
-                                    b"priority" => {
-                                        let priority = Priority::new(text.parse()?)?;
-                                        url.priority = Some(priority);
-                                    }
-                                    b"changefreq" => {
-                                        url.change_freq = Some(text.to_string().into());
-                                    }
+                                    b"loc" => url.loc.push_str(&text),
+                                    b"lastmod" => url.last_mod = Some(W3CDateTime::parse(&text)?),
+                                    b"priority" => url.priority = Some(Priority::new(text.parse()?)?),
+                                    b"changefreq" => url.change_freq = Some(text.to_string().into()),
                                     _ => {}
                                 }
                             }
@@ -83,7 +76,6 @@ impl Sitemap {
                         url = UrlEntry::new();
                     }
                 }
-
                 _ => {}
             }
             buf.clear();
@@ -150,6 +142,12 @@ impl UrlEntry {
             change_freq: None,
             priority: None,
         }
+    }
+}
+
+impl Default for UrlEntry {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
