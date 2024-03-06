@@ -22,6 +22,7 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 - [ ] serialization
   - [ ] xml
     - add ability to edit?
+- [ ] extract validation code
 
 ### CLI
 

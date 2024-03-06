@@ -1,57 +1,49 @@
 use chrono::ParseError as ChronoParseError;
-use quick_xml::Error as QuickXMLError;
+use quick_xml::Error as XmlError;
 use std::io::Error as IoError;
 use std::num::ParseFloatError;
-use ureq::Error as UreqError;
 use url::ParseError as UrlParseError;
 
 #[derive(Debug)]
-pub enum SitemapError {
-    QuickXMLError(QuickXMLError),
+pub enum Error {
+    XmlError(XmlError),
     IoError(IoError),
     ParsePriorityError(ParseFloatError),
     EncodingError,
-    HttpRequestError(UreqError),
     UrlParseError(UrlParseError),
     TooManyUrls,
     UrlValueTooLong,
     PriorityTooLow,
     PriorityTooHigh,
-    ChronoParseError(ChronoParseError),
+    W3CDatetimeParseError(ChronoParseError),
 }
 
-impl From<QuickXMLError> for SitemapError {
-    fn from(value: QuickXMLError) -> Self {
-        SitemapError::QuickXMLError(value)
+impl From<XmlError> for Error {
+    fn from(value: XmlError) -> Self {
+        Error::XmlError(value)
     }
 }
 
-impl From<IoError> for SitemapError {
+impl From<IoError> for Error {
     fn from(value: IoError) -> Self {
-        SitemapError::IoError(value)
+        Error::IoError(value)
     }
 }
 
-impl From<ParseFloatError> for SitemapError {
+impl From<ParseFloatError> for Error {
     fn from(value: ParseFloatError) -> Self {
-        SitemapError::ParsePriorityError(value)
+        Error::ParsePriorityError(value)
     }
 }
 
-impl From<UreqError> for SitemapError {
-    fn from(value: UreqError) -> Self {
-        SitemapError::HttpRequestError(value)
-    }
-}
-
-impl From<ChronoParseError> for SitemapError {
+impl From<ChronoParseError> for Error {
     fn from(value: ChronoParseError) -> Self {
-        SitemapError::ChronoParseError(value)
+        Error::W3CDatetimeParseError(value)
     }
 }
 
-impl From<UrlParseError> for SitemapError {
+impl From<UrlParseError> for Error {
     fn from(value: UrlParseError) -> Self {
-        SitemapError::UrlParseError(value)
+        Error::UrlParseError(value)
     }
 }
