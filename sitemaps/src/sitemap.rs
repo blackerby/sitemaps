@@ -30,25 +30,22 @@ impl Sitemap {
         };
         let mut url = UrlEntry::new();
         let mut url_count: u32 = 0;
-        'outer: loop {
+        loop {
             match reader.read_event_into(&mut buf) {
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
-                Ok(Event::Eof) => {
-                    break;
-                }
-                Ok(Event::Decl(e)) => match Self::check_encoding(e) {
-                    Err(err) => return Err(err),
-                    Ok(()) => {}
-                },
+                Ok(Event::Eof) => break,
+                Ok(Event::Decl(e)) => Self::check_encoding(e)?,
                 Ok(Event::Start(start)) => {
-                    'inner: loop {
+                    loop {
                         match reader.read_event_into(&mut nested_buf) {
-                            Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
+                            Err(e) => {
+                                panic!("Error at position {}: {:?}", reader.buffer_position(), e)
+                            }
                             Ok(Event::Start(e)) => {
                                 if e.name().as_ref() == b"url" {
                                     nested_buf.clear();
                                     buf.clear();
-                                    continue 'outer;
+                                    break; // continue 'outer;
                                 }
                             }
                             Ok(Event::Text(e)) => {
@@ -70,26 +67,23 @@ impl Sitemap {
                                     _ => {}
                                 }
                             }
-                            Ok(Event::End(e)) => {
-                                if e.name().as_ref() == b"url" {
-                                    url_count += 1;
-    
-                                    if url_count > 50_000 {
-                                        return Err(Error::TooManyUrls);
-                                    }
-    
-                                    sitemap.urlset.0.push(url);
-                                    url = UrlEntry::new();
-                                }
-    
-                                if e.name().as_ref() == b"urlset" {
-                                    break;
-                                }
-                            }
-                            _ => {}
+                            _ => break,
                         }
-                    }    
-                },
+                    }
+                }
+                Ok(Event::End(e)) => {
+                    if e.name().as_ref() == b"url" {
+                        url_count += 1;
+
+                        if url_count > 50_000 {
+                            return Err(Error::TooManyUrls);
+                        }
+
+                        sitemap.urlset.0.push(url);
+                        url = UrlEntry::new();
+                    }
+                }
+
                 _ => {}
             }
             buf.clear();
