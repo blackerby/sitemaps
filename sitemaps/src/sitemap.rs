@@ -117,7 +117,7 @@ impl Sitemap {
     }
 
     pub fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
-        self.write(::quick_xml::Writer::new(writer))
+        self.write(Writer::new(writer))
     }
 
     fn write_text_element<W: Write, N: AsRef<str>, T: AsRef<str>>(
