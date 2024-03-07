@@ -1,8 +1,9 @@
 extern crate sitemaps;
 
 use sitemaps::error::Error;
-use sitemaps::sitemap::Sitemap;
-use std::fs::File;
+use sitemaps::sitemap::{ChangeFreq, Priority, Sitemap, UrlEntry, Urlset};
+use sitemaps::w3c_datetime::W3CDateTime;
+use std::fs::{self, File};
 use std::io::BufReader;
 
 const EXPECTED: &str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -42,5 +43,38 @@ fn test_write_two_happy() -> Result<(), Error> {
             .filter(|c| !c.is_whitespace())
             .collect::<String>()
     );
+    Ok(())
+}
+
+#[test]
+fn test_new_sitemap() -> Result<(), Error> {
+    let mut urls = vec![];
+
+    let mut url_entry = UrlEntry::new();
+    url_entry.loc = String::from("http://www.example.com/");
+    url_entry.last_mod = Some(W3CDateTime::new("2005-01-01")?);
+    url_entry.change_freq = Some(ChangeFreq::new(String::from("monthly")));
+    url_entry.priority = Some(Priority(0.8));
+
+    urls.push(url_entry);
+
+    let sitemap = Sitemap {
+        urlset: Urlset(urls),
+    };
+
+    let mut buf = Vec::new();
+    let written = sitemap.write_to(&mut buf)?;
+    let result = std::str::from_utf8(written)
+        .unwrap()
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>();
+
+    let expected = fs::read_to_string("tests/data/example_1_url.xml")?
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>();
+    assert_eq!(result, expected);
+
     Ok(())
 }

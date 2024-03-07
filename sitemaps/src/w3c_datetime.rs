@@ -12,6 +12,10 @@ pub enum W3CDateTime {
 }
 
 impl W3CDateTime {
+    pub fn new(string: &str) -> Result<W3CDateTime, ParseError> {
+        Self::parse(string)
+    }
+
     pub fn parse(string: &str) -> Result<W3CDateTime, ParseError> {
         if string.len() == 10 {
             Ok(W3CDateTime::Date(string.parse::<NaiveDate>()?))

@@ -228,6 +228,12 @@ pub enum ChangeFreq {
     Never,
 }
 
+impl ChangeFreq {
+    pub fn new(string: String) -> Self {
+        Self::from(string)
+    }
+}
+
 impl From<String> for ChangeFreq {
     fn from(value: String) -> Self {
         let normalized_value = value.to_lowercase();
