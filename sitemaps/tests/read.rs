@@ -15,6 +15,7 @@ fn test_parse_one_happy() -> Result<(), Error> {
 
     let sitemap = Sitemap::read_from(reader)?;
 
+    assert_eq!(sitemap.urlset.namespace, sitemaps::NAMESPACE);
     assert_eq!(sitemap.urlset.urls.len(), 1);
     assert_eq!(
         sitemap.urlset.urls[0].loc.to_string(),

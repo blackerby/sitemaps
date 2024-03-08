@@ -29,7 +29,7 @@ impl Sitemap {
 
         let mut sitemap = Sitemap {
             urlset: Urlset {
-                attributes: vec![],
+                namespace: String::new(),
                 urls: vec![],
             },
         };
@@ -42,8 +42,18 @@ impl Sitemap {
                 Ok(Event::Decl(e)) => Self::check_encoding(e)?,
                 Ok(Event::Start(start)) => {
                     if start.name().as_ref() == b"urlset" {
-                        continue;
+                        for attr_result in start.attributes() {
+                            let a = attr_result?;
+                            match a.key.as_ref() {
+                                b"xmlns" => {
+                                    sitemap.urlset.namespace =
+                                        a.decode_and_unescape_value(&reader)?.to_string();
+                                }
+                                _ => {}
+                            }
+                        }
                     }
+
                     if start.name().as_ref() == b"url" {
                         continue;
                     }
@@ -171,14 +181,14 @@ impl Sitemap {
 /// `<urlset>` is the XML root element. Here it is represented as a list of URLs.
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Urlset {
-    pub attributes: Vec<String>,
+    pub namespace: String,
     pub urls: Vec<UrlEntry>,
 }
 
 impl Urlset {
     pub fn new() -> Self {
         Self {
-            attributes: vec![],
+            namespace: String::new(),
             urls: vec![],
         }
     }
