@@ -1,10 +1,11 @@
-use crate::MAX_URL_LENGTH;
+use crate::{MAX_URL_LENGTH, NAMESPACE};
 use core::fmt;
-use quick_xml::events::{BytesDecl, Event};
+use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::reader::Reader;
+use quick_xml::writer::Writer;
 use serde::Serialize;
 use std::borrow::Cow;
-use std::io::BufRead;
+use std::io::{BufRead, Write};
 use url::Url;
 
 use crate::{error::Error, w3c_datetime::W3CDateTime};
@@ -80,6 +81,57 @@ impl Sitemap {
             buf.clear();
         }
         Ok(sitemap)
+    }
+
+    fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
+        writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
+
+        let name = "urlset";
+        let mut element = BytesStart::new(name);
+        element.push_attribute(("xmlns", NAMESPACE));
+        writer.write_event(Event::Start(element))?;
+
+        for url_entry in &self.urlset.0 {
+            let inner_name = "url";
+            writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
+
+            Self::write_text_element(&mut writer, "loc", url_entry.loc.clone())?;
+
+            if let Some(lastmod) = url_entry.last_mod {
+                Self::write_text_element(&mut writer, "lastmod", lastmod.to_string())?;
+            }
+
+            if let Some(changefreq) = url_entry.change_freq {
+                Self::write_text_element(&mut writer, "changefreq", changefreq.to_string())?;
+            }
+
+            if let Some(priority) = url_entry.priority {
+                Self::write_text_element(&mut writer, "priority", priority.to_string())?;
+            }
+
+            writer.write_event(Event::End(BytesEnd::new(inner_name)))?;
+        }
+
+        writer.write_event(Event::End(BytesEnd::new(name)))?;
+        Ok(writer.into_inner())
+    }
+
+    pub fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
+        self.write(Writer::new(writer))
+    }
+
+    fn write_text_element<W: Write, N: AsRef<str>, T: AsRef<str>>(
+        writer: &mut Writer<W>,
+        name: N,
+        text: T,
+    ) -> Result<(), Error> {
+        let name = name.as_ref();
+
+        writer.write_event(Event::Start(BytesStart::new(name)))?;
+        writer.write_event(Event::Text(BytesText::new(text.as_ref())))?;
+        writer.write_event(Event::End(BytesEnd::new(name)))?;
+
+        Ok(())
     }
 
     fn check_encoding(e: BytesDecl) -> Result<(), Error> {
@@ -174,6 +226,12 @@ pub enum ChangeFreq {
     Monthly,
     Yearly,
     Never,
+}
+
+impl ChangeFreq {
+    pub fn new(string: String) -> Self {
+        Self::from(string)
+    }
 }
 
 impl From<String> for ChangeFreq {
