@@ -10,7 +10,7 @@ use url::Url;
 
 use crate::{error::Error, w3c_datetime::W3CDateTime};
 
-/// A Sitemap is an entity-escaped, UTF-8 encoded list of `<url>` elements contained in
+/// A Sitemap is an entity-escaped, UTF-8 encoded list of `<url>` elements contained
 /// in a `<urlset>` element.
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Sitemap {
@@ -19,6 +19,7 @@ pub struct Sitemap {
 }
 
 impl Sitemap {
+    /// Read a sitemap from a Reader.
     pub fn read_from<R: BufRead>(reader: R) -> Result<Sitemap, Error> {
         let mut reader = Reader::from_reader(reader);
         reader.trim_text(true).expand_empty_elements(true);
@@ -50,7 +51,7 @@ impl Sitemap {
                                 let text = e.unescape()?.to_string();
                                 match start.name().as_ref() {
                                     b"loc" => url.loc.push_str(&text),
-                                    b"lastmod" => url.last_mod = Some(W3CDateTime::parse(&text)?),
+                                    b"lastmod" => url.last_mod = Some(W3CDateTime::new(&text)?),
                                     b"priority" => {
                                         url.priority = Some(Priority::new(text.parse()?)?)
                                     }
@@ -116,6 +117,7 @@ impl Sitemap {
         Ok(writer.into_inner())
     }
 
+    /// Serialize a Sitemap to a Writer as XML.
     pub fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
         self.write(Writer::new(writer))
     }
