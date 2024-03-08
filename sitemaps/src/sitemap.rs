@@ -194,6 +194,12 @@ impl Urlset {
     }
 }
 
+impl Default for Urlset {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// The priority of this URL relative to other URLs on the site.
 /// Valid values range from 0.0 to 1.0.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize)]
