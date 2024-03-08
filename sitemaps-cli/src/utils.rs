@@ -89,18 +89,18 @@ fn build_headers_and_columns(
         headers.push(HEADERS[0]);
         let locs = sitemap
             .urlset
-            .0
+            .urls
             .iter()
             .map(|url| url.loc.to_string())
             .collect::<Vec<String>>();
 
         columns.push(locs);
     }
-    if cli.lastmod && sitemap.urlset.0.iter().any(|url| url.last_mod.is_some()) {
+    if cli.lastmod && sitemap.urlset.urls.iter().any(|url| url.last_mod.is_some()) {
         headers.push(HEADERS[1]);
         let lastmods = sitemap
             .urlset
-            .0
+            .urls
             .iter()
             .map(|url| {
                 if let Some(lastmod) = url.last_mod {
@@ -113,11 +113,17 @@ fn build_headers_and_columns(
 
         columns.push(lastmods);
     }
-    if cli.changefreq && sitemap.urlset.0.iter().any(|url| url.change_freq.is_some()) {
+    if cli.changefreq
+        && sitemap
+            .urlset
+            .urls
+            .iter()
+            .any(|url| url.change_freq.is_some())
+    {
         headers.push(HEADERS[2]);
         let changefreqs = sitemap
             .urlset
-            .0
+            .urls
             .iter()
             .map(|url| {
                 if let Some(changefreq) = url.change_freq {
@@ -130,11 +136,11 @@ fn build_headers_and_columns(
 
         columns.push(changefreqs);
     }
-    if cli.priority && sitemap.urlset.0.iter().any(|url| url.priority.is_some()) {
+    if cli.priority && sitemap.urlset.urls.iter().any(|url| url.priority.is_some()) {
         headers.push(HEADERS[3]);
         let priorities = sitemap
             .urlset
-            .0
+            .urls
             .iter()
             .map(|url| {
                 if let Some(priority) = url.priority {

@@ -28,7 +28,10 @@ impl Sitemap {
         let mut nested_buf = Vec::new();
 
         let mut sitemap = Sitemap {
-            urlset: Urlset(vec![]),
+            urlset: Urlset {
+                attributes: vec![],
+                urls: vec![],
+            },
         };
         let mut url = UrlEntry::new();
         let mut url_count: u32 = 0;
@@ -38,6 +41,9 @@ impl Sitemap {
                 Ok(Event::Eof) => break,
                 Ok(Event::Decl(e)) => Self::check_encoding(e)?,
                 Ok(Event::Start(start)) => {
+                    if start.name().as_ref() == b"urlset" {
+                        continue;
+                    }
                     if start.name().as_ref() == b"url" {
                         continue;
                     }
@@ -73,7 +79,7 @@ impl Sitemap {
                             return Err(Error::TooManyUrls);
                         }
 
-                        sitemap.urlset.0.push(url);
+                        sitemap.urlset.urls.push(url);
                         url = UrlEntry::new();
                     }
                 }
@@ -92,7 +98,7 @@ impl Sitemap {
         element.push_attribute(("xmlns", NAMESPACE));
         writer.write_event(Event::Start(element))?;
 
-        for url_entry in &self.urlset.0 {
+        for url_entry in &self.urlset.urls {
             let inner_name = "url";
             writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
 
@@ -164,7 +170,19 @@ impl Sitemap {
 
 /// `<urlset>` is the XML root element. Here it is represented as a list of URLs.
 #[derive(Debug, PartialEq, Serialize)]
-pub struct Urlset(pub Vec<UrlEntry>);
+pub struct Urlset {
+    pub attributes: Vec<String>,
+    pub urls: Vec<UrlEntry>,
+}
+
+impl Urlset {
+    pub fn new() -> Self {
+        Self {
+            attributes: vec![],
+            urls: vec![],
+        }
+    }
+}
 
 /// The priority of this URL relative to other URLs on the site.
 /// Valid values range from 0.0 to 1.0.

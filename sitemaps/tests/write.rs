@@ -58,9 +58,10 @@ fn test_new_sitemap() -> Result<(), Error> {
 
     urls.push(url_entry);
 
-    let sitemap = Sitemap {
-        urlset: Urlset(urls),
+    let mut sitemap = Sitemap {
+        urlset: Urlset::new(),
     };
+    sitemap.urlset.urls = urls;
 
     let mut buf = Vec::new();
     let written = sitemap.write_to(&mut buf)?;
