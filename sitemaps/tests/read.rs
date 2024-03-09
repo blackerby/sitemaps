@@ -3,6 +3,7 @@ extern crate sitemaps;
 use sitemaps::error::Error;
 use sitemaps::sitemap::{ChangeFreq, Priority, Sitemap};
 use sitemaps::w3c_datetime::W3CDateTime;
+use sitemaps::NAMESPACE;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -74,6 +75,10 @@ fn test_parse_external_happy() -> Result<(), Error> {
         sitemap.urlset.urls[1].loc,
         "https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl2.xml"
     );
+
+    assert_eq!(sitemap.urlset.namespace, NAMESPACE);
+    assert!(sitemap.urlset.schema_location.is_some());
+    assert!(sitemap.urlset.schema_instance.is_some());
 
     Ok(())
 }

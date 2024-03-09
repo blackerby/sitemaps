@@ -1,4 +1,4 @@
-use crate::{MAX_URL_LENGTH, NAMESPACE};
+use crate::MAX_URL_LENGTH;
 use core::fmt;
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::reader::Reader;
@@ -28,11 +28,9 @@ impl Sitemap {
         let mut nested_buf = Vec::new();
 
         let mut sitemap = Sitemap {
-            urlset: Urlset {
-                namespace: String::new(),
-                urls: vec![],
-            },
+            urlset: Urlset::new(),
         };
+
         let mut url = UrlEntry::new();
         let mut url_count: u32 = 0;
         loop {
@@ -45,6 +43,14 @@ impl Sitemap {
                         for attr_result in start.attributes() {
                             let a = attr_result?;
                             match a.key.as_ref() {
+                                b"xmlns:xsi" => {
+                                    sitemap.urlset.schema_instance =
+                                        Some(a.decode_and_unescape_value(&reader)?.to_string());
+                                }
+                                b"xsi:schemaLocation" => {
+                                    sitemap.urlset.schema_location =
+                                        Some(a.decode_and_unescape_value(&reader)?.to_string());
+                                }
                                 b"xmlns" => {
                                     sitemap.urlset.namespace =
                                         a.decode_and_unescape_value(&reader)?.to_string();
@@ -105,7 +111,13 @@ impl Sitemap {
 
         let name = "urlset";
         let mut element = BytesStart::new(name);
-        element.push_attribute(("xmlns", NAMESPACE));
+        if let Some(ref schema_instance) = self.urlset.schema_instance {
+            element.push_attribute(("xmlns:xsi", schema_instance.as_str()));
+        }
+        if let Some(ref schema_location) = self.urlset.schema_location {
+            element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
+        }
+        element.push_attribute(("xmlns", self.urlset.namespace.as_str()));
         writer.write_event(Event::Start(element))?;
 
         for url_entry in &self.urlset.urls {
@@ -181,6 +193,8 @@ impl Sitemap {
 /// `<urlset>` is the XML root element. Here it is represented as a list of URLs.
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Urlset {
+    pub schema_instance: Option<String>,
+    pub schema_location: Option<String>,
     pub namespace: String,
     pub urls: Vec<UrlEntry>,
 }
@@ -188,15 +202,11 @@ pub struct Urlset {
 impl Urlset {
     pub fn new() -> Self {
         Self {
+            schema_instance: None,
+            schema_location: None,
             namespace: String::new(),
             urls: vec![],
         }
-    }
-}
-
-impl Default for Urlset {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

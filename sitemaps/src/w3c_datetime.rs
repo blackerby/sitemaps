@@ -30,8 +30,14 @@ impl W3CDateTime {
 impl fmt::Display for W3CDateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            W3CDateTime::Date(date) => f.write_str(&date.to_string()),
-            W3CDateTime::DateTime(datetime) => f.write_str(&datetime.to_string()),
+            W3CDateTime::Date(date) => {
+                let formatted = date.format("%Y-%m-%d").to_string();
+                f.write_str(&formatted)
+            }
+            W3CDateTime::DateTime(datetime) => {
+                let formatted = datetime.format("%Y-%m-%dT%H:%M:%SZ").to_string();
+                f.write_str(&formatted)
+            }
         }
     }
 }
@@ -55,7 +61,7 @@ mod tests {
     fn test_w3c_midnight_utc() -> Result<(), ParseError> {
         let date_string = "2024-02-27T00:00:00Z";
         let result = W3CDateTime::parse(date_string)?;
-        let expected = "2024-02-27 00:00:00 +00:00";
+        let expected = "2024-02-27T00:00:00Z";
 
         assert_eq!(expected, result.to_string());
 
