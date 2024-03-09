@@ -1,4 +1,5 @@
 use chrono::ParseError as ChronoParseError;
+use quick_xml::events::attributes::AttrError;
 use quick_xml::Error as XmlError;
 use std::io::Error as IoError;
 use std::num::ParseFloatError;
@@ -7,6 +8,7 @@ use url::ParseError as UrlParseError;
 #[derive(Debug)]
 pub enum Error {
     XmlError(XmlError),
+    AttrError(AttrError),
     IoError(IoError),
     ParsePriorityError(ParseFloatError),
     EncodingError,
@@ -21,6 +23,12 @@ pub enum Error {
 impl From<XmlError> for Error {
     fn from(value: XmlError) -> Self {
         Error::XmlError(value)
+    }
+}
+
+impl From<AttrError> for Error {
+    fn from(value: AttrError) -> Self {
+        Error::AttrError(value)
     }
 }
 

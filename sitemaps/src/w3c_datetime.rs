@@ -1,3 +1,4 @@
+const RFC_339_SECS_LEN: usize = 20;
 use chrono::{DateTime, FixedOffset, NaiveDate, ParseError};
 use serde::Serialize;
 use std::fmt;
@@ -7,8 +8,8 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum W3CDateTime {
+    DateTime(DateTime<FixedOffset>, usize),
     Date(NaiveDate),
-    DateTime(DateTime<FixedOffset>),
 }
 
 impl W3CDateTime {
@@ -21,7 +22,8 @@ impl W3CDateTime {
             Ok(W3CDateTime::Date(string.parse::<NaiveDate>()?))
         } else {
             Ok(W3CDateTime::DateTime(
-                string.parse::<DateTime<FixedOffset>>()?,
+                DateTime::parse_from_rfc3339(string)?,
+                string.len(),
             ))
         }
     }
@@ -30,8 +32,18 @@ impl W3CDateTime {
 impl fmt::Display for W3CDateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            W3CDateTime::Date(date) => f.write_str(&date.to_string()),
-            W3CDateTime::DateTime(datetime) => f.write_str(&datetime.to_string()),
+            Self::Date(date) => f.write_str(&date.format("%Y-%m-%d").to_string()),
+            Self::DateTime(datetime, length) => {
+                let formatted = datetime.to_rfc3339_opts(
+                    if length == RFC_339_SECS_LEN {
+                        chrono::SecondsFormat::Secs
+                    } else {
+                        chrono::SecondsFormat::Millis
+                    },
+                    true,
+                );
+                f.write_str(&formatted)
+            }
         }
     }
 }
@@ -55,7 +67,7 @@ mod tests {
     fn test_w3c_midnight_utc() -> Result<(), ParseError> {
         let date_string = "2024-02-27T00:00:00Z";
         let result = W3CDateTime::parse(date_string)?;
-        let expected = "2024-02-27 00:00:00 +00:00";
+        let expected = "2024-02-27T00:00:00Z";
 
         assert_eq!(expected, result.to_string());
 

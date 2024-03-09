@@ -17,9 +17,9 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 - [ ] sitemap index handling
 - [ ] use `thiserror`
-- [ ] add doc comments
-- [ ] validate `urlset` namespace attribute?
+- [ ] document!
 - [ ] extract validation code
+- [ ] beef up testing
 
 ### CLI
 

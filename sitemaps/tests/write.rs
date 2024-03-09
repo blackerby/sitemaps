@@ -58,9 +58,10 @@ fn test_new_sitemap() -> Result<(), Error> {
 
     urls.push(url_entry);
 
-    let sitemap = Sitemap {
-        urlset: Urlset(urls),
+    let mut sitemap = Sitemap {
+        urlset: Urlset::new(),
     };
+    sitemap.urlset.urls = urls;
 
     let mut buf = Vec::new();
     let written = sitemap.write_to(&mut buf)?;
@@ -74,7 +75,30 @@ fn test_new_sitemap() -> Result<(), Error> {
         .chars()
         .filter(|c| !c.is_whitespace())
         .collect::<String>();
+
     assert_eq!(result, expected);
 
+    Ok(())
+}
+
+#[test]
+fn test_write_with_schema() -> Result<(), Error> {
+    let expected = std::fs::read_to_string("tests/data/sitemap.xml")?
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>();
+    let file = File::open("tests/data/sitemap.xml")?;
+    let reader = BufReader::new(file);
+    let sitemap = Sitemap::read_from(reader)?;
+
+    let mut buf = Vec::new();
+    let written = sitemap.write_to(&mut buf)?;
+    let result = std::str::from_utf8(written)
+        .unwrap()
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .collect::<String>();
+
+    assert_eq!(result, expected);
     Ok(())
 }
