@@ -1,4 +1,4 @@
-use crate::MAX_URL_LENGTH;
+use crate::{MAX_URL_LENGTH, NAMESPACE};
 use core::fmt;
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::reader::Reader;
@@ -117,7 +117,12 @@ impl Sitemap {
         if let Some(ref schema_location) = self.urlset.schema_location {
             element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
         }
-        element.push_attribute(("xmlns", self.urlset.namespace.as_str()));
+        let namespace = if self.urlset.namespace.is_empty() {
+            NAMESPACE
+        } else {
+            self.urlset.namespace.as_str()
+        };
+        element.push_attribute(("xmlns", namespace));
         writer.write_event(Event::Start(element))?;
 
         for url_entry in &self.urlset.urls {
