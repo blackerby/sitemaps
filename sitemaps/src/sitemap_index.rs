@@ -104,7 +104,7 @@ impl SitemapRead for SitemapIndex {
                 }
 
                 Ok(Event::End(e)) => {
-                    if e.name().as_ref() == b"url" {
+                    if e.name().as_ref() == b"sitemap" {
                         entry_count += 1;
 
                         if entry_count > 50_000 {
