@@ -88,7 +88,6 @@ fn build_headers_and_columns(
     if cli.loc {
         headers.push(HEADERS[0]);
         let locs = sitemap
-            .urlset
             .urls
             .iter()
             .map(|url| url.loc.to_string())
@@ -96,10 +95,9 @@ fn build_headers_and_columns(
 
         columns.push(locs);
     }
-    if cli.lastmod && sitemap.urlset.urls.iter().any(|url| url.last_mod.is_some()) {
+    if cli.lastmod && sitemap.urls.iter().any(|url| url.last_mod.is_some()) {
         headers.push(HEADERS[1]);
         let lastmods = sitemap
-            .urlset
             .urls
             .iter()
             .map(|url| {
@@ -113,16 +111,9 @@ fn build_headers_and_columns(
 
         columns.push(lastmods);
     }
-    if cli.changefreq
-        && sitemap
-            .urlset
-            .urls
-            .iter()
-            .any(|url| url.change_freq.is_some())
-    {
+    if cli.changefreq && sitemap.urls.iter().any(|url| url.change_freq.is_some()) {
         headers.push(HEADERS[2]);
         let changefreqs = sitemap
-            .urlset
             .urls
             .iter()
             .map(|url| {
@@ -136,10 +127,9 @@ fn build_headers_and_columns(
 
         columns.push(changefreqs);
     }
-    if cli.priority && sitemap.urlset.urls.iter().any(|url| url.priority.is_some()) {
+    if cli.priority && sitemap.urls.iter().any(|url| url.priority.is_some()) {
         headers.push(HEADERS[3]);
         let priorities = sitemap
-            .urlset
             .urls
             .iter()
             .map(|url| {

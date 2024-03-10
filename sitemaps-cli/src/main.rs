@@ -10,6 +10,7 @@ use clap::Parser;
 
 use sitemaps::error::Error;
 use sitemaps::sitemap::Sitemap;
+use sitemaps::SitemapRead;
 
 fn main() -> Result<(), Error> {
     let cli = Cli::parse();
