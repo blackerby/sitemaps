@@ -1,4 +1,4 @@
-use std::io::{BufRead, Seek};
+use std::io::{BufRead, BufReader, Seek};
 
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::Reader;
@@ -28,7 +28,6 @@ impl Sitemaps {
     pub fn read<R: BufRead + Seek>(mut reader: R) -> Result<Self, Error> {
         let mut buf = String::new();
         reader.read_to_string(&mut buf)?;
-        reader.rewind()?;
         let mut xml_reader = Reader::from_str(&buf);
         xml_reader.trim_text(true).expand_empty_elements(true);
 
@@ -41,17 +40,20 @@ impl Sitemaps {
                 ),
                 Ok(Event::Eof) => panic!("Unexpected EOF"),
                 Ok(Event::Decl(_)) => continue,
-                Ok(Event::Start(start)) => match start.name().as_ref() {
-                    b"urlset" => {
-                        let sitemap = Sitemap::read_from(reader)?;
-                        return Ok(Self::Sitemap(sitemap));
+                Ok(Event::Start(start)) => {
+                    let buf_reader = BufReader::new(buf.as_bytes());
+                    match start.name().as_ref() {
+                        b"urlset" => {
+                            let sitemap = Sitemap::read_from(buf_reader)?;
+                            return Ok(Self::Sitemap(sitemap));
+                        }
+                        b"sitemapindex" => {
+                            let sitemap_index = SitemapIndex::read_from(buf_reader)?;
+                            return Ok(Self::SitemapIndex(sitemap_index));
+                        }
+                        _ => break,
                     }
-                    b"sitemapindex" => {
-                        let sitemap_index = SitemapIndex::read_from(reader)?;
-                        return Ok(Self::SitemapIndex(sitemap_index));
-                    }
-                    _ => break,
-                },
+                }
                 _ => break,
             }
         }
