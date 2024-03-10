@@ -1,4 +1,4 @@
-use crate::NAMESPACE;
+use crate::{SitemapWrite, SitemapsEntry, NAMESPACE};
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, Event};
 use quick_xml::{Reader, Writer};
 use serde::Serialize;
@@ -40,6 +40,33 @@ impl SitemapEntry {
             loc: String::new(),
             last_mod: None,
         }
+    }
+}
+
+impl SitemapsEntry for SitemapEntry {
+    fn get_loc(&self) -> String {
+        self.loc.to_string()
+    }
+}
+
+impl SitemapWrite for SitemapIndex {
+    fn write_locs(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|url| url.get_loc())
+            .collect::<Vec<String>>()
+    }
+    fn write_lastmods(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|url| {
+                if let Some(lastmod) = url.last_mod {
+                    lastmod.to_string()
+                } else {
+                    String::new()
+                }
+            })
+            .collect::<Vec<String>>()
     }
 }
 

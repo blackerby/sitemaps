@@ -2,6 +2,7 @@ use std::io::{BufRead, BufReader};
 
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::Reader;
+use serde::Serialize;
 use sitemap::Sitemap;
 use sitemap_index::SitemapIndex;
 
@@ -19,6 +20,7 @@ pub mod w3c_datetime;
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
 pub const MAX_URL_LENGTH: usize = 2048;
 
+#[derive(Serialize)]
 pub enum Sitemaps {
     Sitemap(Sitemap),
     SitemapIndex(SitemapIndex),
@@ -39,7 +41,6 @@ impl Sitemaps {
                     e
                 ),
                 Ok(Event::Eof) => return Err(Error::UnexpectedEof),
-                Ok(Event::Decl(_)) => continue,
                 Ok(Event::Start(start)) => {
                     let buf_reader = BufReader::new(buf.as_bytes());
                     match start.name().as_ref() {
@@ -51,13 +52,27 @@ impl Sitemaps {
                             let sitemap_index = SitemapIndex::read_from(buf_reader)?;
                             return Ok(Self::SitemapIndex(sitemap_index));
                         }
-                        _ => break,
+                        _ => return Err(Error::NotASitemap),
                     }
                 }
-                _ => break,
+                _ => {}
             }
         }
-        Err(Error::NotASitemap)
+    }
+}
+
+impl SitemapWrite for Sitemaps {
+    fn write_locs(&self) -> Vec<String> {
+        match self {
+            Sitemaps::Sitemap(sitemap) => sitemap.write_locs(),
+            Sitemaps::SitemapIndex(index) => index.write_locs(),
+        }
+    }
+    fn write_lastmods(&self) -> Vec<String> {
+        match self {
+            Sitemaps::Sitemap(sitemap) => sitemap.write_lastmods(),
+            Sitemaps::SitemapIndex(index) => index.write_lastmods(),
+        }
     }
 }
 
@@ -108,4 +123,13 @@ pub trait SitemapRead {
 
         Ok(())
     }
+}
+
+pub trait SitemapsEntry {
+    fn get_loc(&self) -> String;
+}
+
+pub trait SitemapWrite {
+    fn write_locs(&self) -> Vec<String>;
+    fn write_lastmods(&self) -> Vec<String>;
 }

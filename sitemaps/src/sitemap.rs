@@ -1,4 +1,4 @@
-use crate::{SitemapRead, NAMESPACE};
+use crate::{SitemapRead, SitemapWrite, SitemapsEntry, NAMESPACE};
 use core::fmt;
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, Event};
 use quick_xml::reader::Reader;
@@ -27,6 +27,27 @@ impl Sitemap {
             namespace: String::new(),
             urls: vec![],
         }
+    }
+}
+
+impl SitemapWrite for Sitemap {
+    fn write_locs(&self) -> Vec<String> {
+        self.urls
+            .iter()
+            .map(|url| url.get_loc())
+            .collect::<Vec<String>>()
+    }
+    fn write_lastmods(&self) -> Vec<String> {
+        self.urls
+            .iter()
+            .map(|url| {
+                if let Some(lastmod) = url.last_mod {
+                    lastmod.to_string()
+                } else {
+                    String::new()
+                }
+            })
+            .collect::<Vec<String>>()
     }
 }
 
@@ -209,6 +230,12 @@ impl UrlEntry {
             change_freq: None,
             priority: None,
         }
+    }
+}
+
+impl SitemapsEntry for UrlEntry {
+    fn get_loc(&self) -> String {
+        self.loc.to_string()
     }
 }
 
