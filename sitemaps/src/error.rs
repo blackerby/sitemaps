@@ -18,6 +18,8 @@ pub enum Error {
     PriorityTooLow,
     PriorityTooHigh,
     W3CDatetimeParseError(ChronoParseError),
+    UnexpectedEof,
+    NotASitemap,
 }
 
 impl From<XmlError> for Error {
