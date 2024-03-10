@@ -1,6 +1,9 @@
-use std::io::BufRead;
+use std::io::{BufRead, Seek};
 
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
+use quick_xml::Reader;
+use sitemap::Sitemap;
+use sitemap_index::SitemapIndex;
 
 use crate::error::Error;
 use quick_xml::Writer;
@@ -15,6 +18,46 @@ pub mod w3c_datetime;
 
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
 pub const MAX_URL_LENGTH: usize = 2048;
+
+pub enum Sitemaps {
+    Sitemap(Sitemap),
+    SitemapIndex(SitemapIndex),
+}
+
+impl Sitemaps {
+    pub fn read<R: BufRead + Seek>(mut reader: R) -> Result<Self, Error> {
+        let mut buf = String::new();
+        reader.read_to_string(&mut buf)?;
+        reader.rewind()?;
+        let mut xml_reader = Reader::from_str(&buf);
+        xml_reader.trim_text(true).expand_empty_elements(true);
+
+        loop {
+            match xml_reader.read_event() {
+                Err(e) => panic!(
+                    "Error at position {}: {:?}",
+                    xml_reader.buffer_position(),
+                    e
+                ),
+                Ok(Event::Eof) => panic!("Unexpected EOF"),
+                Ok(Event::Decl(_)) => continue,
+                Ok(Event::Start(start)) => match start.name().as_ref() {
+                    b"urlset" => {
+                        let sitemap = Sitemap::read_from(reader)?;
+                        return Ok(Self::Sitemap(sitemap));
+                    }
+                    b"sitemapindex" => {
+                        let sitemap_index = SitemapIndex::read_from(reader)?;
+                        return Ok(Self::SitemapIndex(sitemap_index));
+                    }
+                    _ => break,
+                },
+                _ => break,
+            }
+        }
+        panic!("Not a sitemap or sitemap index")
+    }
+}
 
 pub trait SitemapRead {
     fn read_from<R: BufRead>(reader: R) -> Result<Self, Error>
