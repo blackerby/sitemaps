@@ -19,6 +19,10 @@ fn test_parse_sitemap_index() -> Result<(), Error> {
     assert!(sitemap_index.schema_instance.is_none());
     assert_eq!(sitemap_index.entries.len(), 2);
     assert_eq!(
+        sitemap_index.entries[0].loc,
+        "http://www.example.com/sitemap1.xml.gz"
+    );
+    assert_eq!(
         sitemap_index.entries[1].last_mod.unwrap().to_string(),
         String::from("2005-01-01")
     );

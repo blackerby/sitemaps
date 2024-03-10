@@ -15,12 +15,21 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### Lib
 
+- [ ] test sitemap index writing
+- [ ] Sitemaps enum with two variants: 
+  - Sitemap
+  - Sitemap index
+  - one method: read_from
+    - reads root element event, calls read_from for appropriate variant based on text of that event
+      - sitemapindex -> Sitemaps::SitemapIndex
+      - urlset -> Sitemap
+      - error on unrecognized root element
 - [ ] use `thiserror`
 - [ ] document!
 - [ ] extract validation code
-- [ ] beef up testing
 
 ### CLI
 
 - [ ] test with `assert_cmd`
 - [ ] sitemap index handling
+- [ ] adjust some flag defaults

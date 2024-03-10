@@ -45,7 +45,7 @@ pub trait SitemapRead {
         Ok(url.as_str().into())
     }
 
-    /// Serialize a Sitemap to a Writer as XML.                   
+    /// Serialize a Sitemap to a Writer as XML.
     fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
         self.write(Writer::new(writer))
     }
