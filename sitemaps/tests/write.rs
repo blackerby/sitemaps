@@ -1,7 +1,7 @@
 extern crate sitemaps;
 
 use sitemaps::error::Error;
-use sitemaps::sitemap::{ChangeFreq, Priority, Sitemap, UrlEntry, Urlset};
+use sitemaps::sitemap::{ChangeFreq, Priority, Sitemap, UrlEntry};
 use sitemaps::w3c_datetime::W3CDateTime;
 use sitemaps::SitemapRead;
 use std::fs::{self, File};
@@ -59,10 +59,8 @@ fn test_new_sitemap() -> Result<(), Error> {
 
     urls.push(url_entry);
 
-    let mut sitemap = Sitemap {
-        urlset: Urlset::new(),
-    };
-    sitemap.urlset.urls = urls;
+    let mut sitemap = Sitemap::new();
+    sitemap.urls = urls;
 
     let mut buf = Vec::new();
     let written = sitemap.write_to(&mut buf)?;

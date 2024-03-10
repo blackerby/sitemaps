@@ -16,21 +16,15 @@ fn test_parse_one_happy() -> Result<(), Error> {
 
     let sitemap = Sitemap::read_from(reader)?;
 
-    assert_eq!(sitemap.urlset.namespace, sitemaps::NAMESPACE);
-    assert_eq!(sitemap.urlset.urls.len(), 1);
+    assert_eq!(sitemap.namespace, sitemaps::NAMESPACE);
+    assert_eq!(sitemap.urls.len(), 1);
+    assert_eq!(sitemap.urls[0].loc.to_string(), "http://www.example.com/");
     assert_eq!(
-        sitemap.urlset.urls[0].loc.to_string(),
-        "http://www.example.com/"
-    );
-    assert_eq!(
-        sitemap.urlset.urls[0].last_mod,
+        sitemap.urls[0].last_mod,
         Some(W3CDateTime::Date("2005-01-01".parse::<NaiveDate>()?))
     );
-    assert_eq!(
-        sitemap.urlset.urls[0].change_freq,
-        Some(ChangeFreq::Monthly)
-    );
-    assert_eq!(sitemap.urlset.urls[0].priority, Some(Priority(0.8)));
+    assert_eq!(sitemap.urls[0].change_freq, Some(ChangeFreq::Monthly));
+    assert_eq!(sitemap.urls[0].priority, Some(Priority(0.8)));
 
     Ok(())
 }
@@ -42,17 +36,14 @@ fn test_parse_two_happy() -> Result<(), Error> {
 
     let sitemap = Sitemap::read_from(reader)?;
 
-    assert_eq!(sitemap.urlset.urls.len(), 2);
+    assert_eq!(sitemap.urls.len(), 2);
+    assert_eq!(sitemap.urls[1].loc.to_string(), "http://www.examples.com/");
     assert_eq!(
-        sitemap.urlset.urls[1].loc.to_string(),
-        "http://www.examples.com/"
-    );
-    assert_eq!(
-        sitemap.urlset.urls[1].last_mod,
+        sitemap.urls[1].last_mod,
         Some(W3CDateTime::Date("2006-01-01".parse::<NaiveDate>()?))
     );
-    assert_eq!(sitemap.urlset.urls[1].change_freq, Some(ChangeFreq::Weekly));
-    assert_eq!(sitemap.urlset.urls[1].priority, Some(Priority(0.5)));
+    assert_eq!(sitemap.urls[1].change_freq, Some(ChangeFreq::Weekly));
+    assert_eq!(sitemap.urls[1].priority, Some(Priority(0.5)));
 
     Ok(())
 }
@@ -66,19 +57,16 @@ fn test_parse_external_happy() -> Result<(), Error> {
 
     let sitemap = Sitemap::read_from(reader).unwrap();
 
-    assert_eq!(sitemap.urlset.urls.len(), 3);
+    assert_eq!(sitemap.urls.len(), 3);
+    assert_eq!(sitemap.urls[1].change_freq, Some(ChangeFreq::Monthly));
     assert_eq!(
-        sitemap.urlset.urls[1].change_freq,
-        Some(ChangeFreq::Monthly)
-    );
-    assert_eq!(
-        sitemap.urlset.urls[1].loc,
+        sitemap.urls[1].loc,
         "https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl2.xml"
     );
 
-    assert_eq!(sitemap.urlset.namespace, NAMESPACE);
-    assert!(sitemap.urlset.schema_location.is_some());
-    assert!(sitemap.urlset.schema_instance.is_some());
+    assert_eq!(sitemap.namespace, NAMESPACE);
+    assert!(sitemap.schema_location.is_some());
+    assert!(sitemap.schema_instance.is_some());
 
     Ok(())
 }

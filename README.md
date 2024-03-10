@@ -15,7 +15,6 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### Lib
 
-- [ ] sitemap index handling
 - [ ] use `thiserror`
 - [ ] document!
 - [ ] extract validation code
@@ -24,3 +23,4 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 ### CLI
 
 - [ ] test with `assert_cmd`
+- [ ] sitemap index handling

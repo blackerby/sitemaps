@@ -13,7 +13,21 @@ use crate::{error::Error, w3c_datetime::W3CDateTime};
 #[derive(Debug, PartialEq, Serialize)]
 pub struct Sitemap {
     /// The set of URLs in the sitemap.
-    pub urlset: Urlset,
+    pub schema_instance: Option<String>,
+    pub schema_location: Option<String>,
+    pub namespace: String,
+    pub urls: Vec<UrlEntry>,
+}
+
+impl Sitemap {
+    pub fn new() -> Self {
+        Self {
+            schema_instance: None,
+            schema_location: None,
+            namespace: String::new(),
+            urls: vec![],
+        }
+    }
 }
 
 impl SitemapRead for Sitemap {
@@ -25,9 +39,7 @@ impl SitemapRead for Sitemap {
         let mut buf = Vec::new();
         let mut nested_buf = Vec::new();
 
-        let mut sitemap = Sitemap {
-            urlset: Urlset::new(),
-        };
+        let mut sitemap = Sitemap::new();
 
         let mut url = UrlEntry::new();
         let mut url_count: u32 = 0;
@@ -42,15 +54,15 @@ impl SitemapRead for Sitemap {
                             let a = attr_result?;
                             match a.key.as_ref() {
                                 b"xmlns:xsi" => {
-                                    sitemap.urlset.schema_instance =
+                                    sitemap.schema_instance =
                                         Some(a.decode_and_unescape_value(&reader)?.to_string());
                                 }
                                 b"xsi:schemaLocation" => {
-                                    sitemap.urlset.schema_location =
+                                    sitemap.schema_location =
                                         Some(a.decode_and_unescape_value(&reader)?.to_string());
                                 }
                                 b"xmlns" => {
-                                    sitemap.urlset.namespace =
+                                    sitemap.namespace =
                                         a.decode_and_unescape_value(&reader)?.to_string();
                                 }
                                 _ => {}
@@ -93,7 +105,7 @@ impl SitemapRead for Sitemap {
                             return Err(Error::TooManyUrls);
                         }
 
-                        sitemap.urlset.urls.push(url);
+                        sitemap.urls.push(url);
                         url = UrlEntry::new();
                     }
                 }
@@ -109,21 +121,21 @@ impl SitemapRead for Sitemap {
 
         let name = "urlset";
         let mut element = BytesStart::new(name);
-        if let Some(ref schema_instance) = self.urlset.schema_instance {
+        if let Some(ref schema_instance) = self.schema_instance {
             element.push_attribute(("xmlns:xsi", schema_instance.as_str()));
         }
-        if let Some(ref schema_location) = self.urlset.schema_location {
+        if let Some(ref schema_location) = self.schema_location {
             element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
         }
-        let namespace = if self.urlset.namespace.is_empty() {
+        let namespace = if self.namespace.is_empty() {
             NAMESPACE
         } else {
-            self.urlset.namespace.as_str()
+            self.namespace.as_str()
         };
         element.push_attribute(("xmlns", namespace));
         writer.write_event(Event::Start(element))?;
 
-        for url_entry in &self.urlset.urls {
+        for url_entry in &self.urls {
             let inner_name = "url";
             writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
 
