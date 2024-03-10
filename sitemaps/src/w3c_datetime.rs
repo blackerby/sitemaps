@@ -1,4 +1,3 @@
-const RFC_339_SECS_LEN: usize = 20;
 use chrono::{DateTime, FixedOffset, NaiveDate, ParseError};
 use serde::Serialize;
 use std::fmt;
@@ -8,7 +7,7 @@ use std::fmt;
 
 #[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum W3CDateTime {
-    DateTime(DateTime<FixedOffset>, usize),
+    DateTime(DateTime<FixedOffset>, bool, bool),
     Date(NaiveDate),
 }
 
@@ -23,7 +22,8 @@ impl W3CDateTime {
         } else {
             Ok(W3CDateTime::DateTime(
                 DateTime::parse_from_rfc3339(string)?,
-                string.len(),
+                string.contains("."),
+                string.to_uppercase().ends_with("Z"),
             ))
         }
     }
@@ -33,14 +33,14 @@ impl fmt::Display for W3CDateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Self::Date(date) => f.write_str(&date.format("%Y-%m-%d").to_string()),
-            Self::DateTime(datetime, length) => {
+            Self::DateTime(datetime, fractional, use_z) => {
                 let formatted = datetime.to_rfc3339_opts(
-                    if length == RFC_339_SECS_LEN {
-                        chrono::SecondsFormat::Secs
-                    } else {
+                    if fractional {
                         chrono::SecondsFormat::Millis
+                    } else {
+                        chrono::SecondsFormat::Secs
                     },
-                    true,
+                    use_z,
                 );
                 f.write_str(&formatted)
             }
