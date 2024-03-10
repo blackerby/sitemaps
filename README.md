@@ -15,7 +15,7 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### Lib
 
-- [ ] test sitemap index writing
+- [x] test sitemap index writing
 - [ ] Sitemaps enum with two variants: 
   - Sitemap
   - Sitemap index
@@ -30,6 +30,6 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### CLI
 
-- [ ] test with `assert_cmd`
-- [ ] sitemap index handling
 - [ ] adjust some flag defaults
+- [ ] sitemap index handling
+- [ ] test with `assert_cmd`
