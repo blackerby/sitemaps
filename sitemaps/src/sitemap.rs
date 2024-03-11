@@ -1,4 +1,4 @@
-use crate::{SitemapRead, SitemapWrite, SitemapsEntry, NAMESPACE};
+use crate::{Entries, SitemapRead, SitemapWrite, SitemapsEntry, NAMESPACE};
 use core::fmt;
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, Event};
 use quick_xml::reader::Reader;
@@ -44,7 +44,7 @@ impl SitemapsEntry for UrlEntry {
     }
 }
 
-impl SitemapWrite for Sitemap {
+impl Entries for Sitemap {
     fn locs(&self) -> Vec<String> {
         self.entries
             .iter()
@@ -56,6 +56,52 @@ impl SitemapWrite for Sitemap {
             .iter()
             .map(|entry| entry.last_mod())
             .collect::<Vec<String>>()
+    }
+}
+
+impl SitemapWrite for Sitemap {
+    fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
+        writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
+
+        let name = "urlset";
+        let mut element = BytesStart::new(name);
+        if let Some(ref schema_instance) = self.schema_instance {
+            element.push_attribute(("xmlns:xsi", schema_instance.as_str()));
+        }
+        if let Some(ref schema_location) = self.schema_location {
+            element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
+        }
+        let namespace = if self.namespace.is_empty() {
+            NAMESPACE
+        } else {
+            self.namespace.as_str()
+        };
+        element.push_attribute(("xmlns", namespace));
+        writer.write_event(Event::Start(element))?;
+
+        for url_entry in &self.entries {
+            let inner_name = "url";
+            writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
+
+            Self::write_text_element(&mut writer, "loc", url_entry.loc.clone())?;
+
+            if let Some(lastmod) = url_entry.last_mod {
+                Self::write_text_element(&mut writer, "lastmod", lastmod.to_string())?;
+            }
+
+            if let Some(changefreq) = url_entry.change_freq {
+                Self::write_text_element(&mut writer, "changefreq", changefreq.to_string())?;
+            }
+
+            if let Some(priority) = url_entry.priority {
+                Self::write_text_element(&mut writer, "priority", priority.to_string())?;
+            }
+
+            writer.write_event(Event::End(BytesEnd::new(inner_name)))?;
+        }
+
+        writer.write_event(Event::End(BytesEnd::new(name)))?;
+        Ok(writer.into_inner())
     }
 }
 
@@ -143,50 +189,6 @@ impl SitemapRead for Sitemap {
             buf.clear();
         }
         Ok(sitemap)
-    }
-
-    fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
-        writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
-
-        let name = "urlset";
-        let mut element = BytesStart::new(name);
-        if let Some(ref schema_instance) = self.schema_instance {
-            element.push_attribute(("xmlns:xsi", schema_instance.as_str()));
-        }
-        if let Some(ref schema_location) = self.schema_location {
-            element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
-        }
-        let namespace = if self.namespace.is_empty() {
-            NAMESPACE
-        } else {
-            self.namespace.as_str()
-        };
-        element.push_attribute(("xmlns", namespace));
-        writer.write_event(Event::Start(element))?;
-
-        for url_entry in &self.entries {
-            let inner_name = "url";
-            writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
-
-            Self::write_text_element(&mut writer, "loc", url_entry.loc.clone())?;
-
-            if let Some(lastmod) = url_entry.last_mod {
-                Self::write_text_element(&mut writer, "lastmod", lastmod.to_string())?;
-            }
-
-            if let Some(changefreq) = url_entry.change_freq {
-                Self::write_text_element(&mut writer, "changefreq", changefreq.to_string())?;
-            }
-
-            if let Some(priority) = url_entry.priority {
-                Self::write_text_element(&mut writer, "priority", priority.to_string())?;
-            }
-
-            writer.write_event(Event::End(BytesEnd::new(inner_name)))?;
-        }
-
-        writer.write_event(Event::End(BytesEnd::new(name)))?;
-        Ok(writer.into_inner())
     }
 }
 

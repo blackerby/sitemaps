@@ -2,7 +2,7 @@ use crate::cli::Cli;
 use comfy_table::Table;
 use csv::Writer;
 use serde_json;
-use sitemaps::{SitemapWrite, Sitemaps};
+use sitemaps::{Entries, Sitemaps};
 use std::{error::Error, io::Write};
 use tabwriter::TabWriter;
 

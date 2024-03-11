@@ -3,7 +3,7 @@ extern crate sitemaps;
 use sitemaps::error::Error;
 use sitemaps::sitemap::{ChangeFreq, Priority, Sitemap, UrlEntry};
 use sitemaps::w3c_datetime::W3CDateTime;
-use sitemaps::SitemapRead;
+use sitemaps::{SitemapRead, SitemapWrite};
 use std::fs::{self, File};
 use std::io::BufReader;
 

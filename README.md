@@ -21,7 +21,6 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### CLI
 
-- [ ] Switch to using Sitemaps enum wrapper
 - [ ] adjust some flag defaults
-- [ ] sitemap index handling
+- [ ] adjust flags for sitemap indexes
 - [ ] test with `assert_cmd`

@@ -2,7 +2,7 @@ extern crate sitemaps;
 
 use sitemaps::error::Error;
 use sitemaps::sitemap_index::SitemapIndex;
-use sitemaps::SitemapRead;
+use sitemaps::{SitemapRead, SitemapWrite};
 use std::fs::File;
 use std::io::BufReader;
 

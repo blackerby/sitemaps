@@ -20,6 +20,9 @@ pub mod w3c_datetime;
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
 pub const MAX_URL_LENGTH: usize = 2048;
 
+/// Sitemaps are one of:
+/// - a Sitemap
+/// - a SitemapIndex
 #[derive(Serialize)]
 pub enum Sitemaps {
     Sitemap(Sitemap),
@@ -27,6 +30,8 @@ pub enum Sitemaps {
 }
 
 impl Sitemaps {
+    /// Reads a buffer and returns a Sitemap or SitemapIndex wrapped by the
+    /// Sitemaps enum wrapper.
     pub fn read<R: BufRead>(mut reader: R) -> Result<Self, Error> {
         let mut buf = String::new();
         reader.read_to_string(&mut buf)?;
@@ -70,7 +75,7 @@ pub trait SitemapRead {
     fn read_from<R: BufRead>(reader: R) -> Result<Self, Error>
     where
         Self: Sized;
-    fn write<W: Write>(&self, writer: Writer<W>) -> Result<W, Error>;
+
     fn check_encoding(e: BytesDecl) -> Result<(), Error> {
         let encoding = e.encoding();
 
@@ -94,7 +99,10 @@ pub trait SitemapRead {
 
         Ok(url.as_str().into())
     }
+}
 
+pub trait SitemapWrite {
+    fn write<W: Write>(&self, writer: Writer<W>) -> Result<W, Error>;
     /// Serialize a Sitemap to a Writer as XML.
     fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
         self.write(Writer::new(writer))
@@ -115,12 +123,7 @@ pub trait SitemapRead {
     }
 }
 
-pub trait SitemapWrite {
-    fn locs(&self) -> Vec<String>;
-    fn lastmods(&self) -> Vec<String>;
-}
-
-impl SitemapWrite for Sitemaps {
+impl Entries for Sitemaps {
     fn locs(&self) -> Vec<String> {
         match self {
             Sitemaps::Sitemap(sitemap) => sitemap.locs(),
@@ -133,4 +136,9 @@ impl SitemapWrite for Sitemaps {
             Sitemaps::SitemapIndex(index) => index.lastmods(),
         }
     }
+}
+
+pub trait Entries {
+    fn locs(&self) -> Vec<String>;
+    fn lastmods(&self) -> Vec<String>;
 }
