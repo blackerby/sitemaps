@@ -17,14 +17,17 @@ fn test_parse_one_happy() -> Result<(), Error> {
     let sitemap = Sitemap::read_from(reader)?;
 
     assert_eq!(sitemap.namespace, sitemaps::NAMESPACE);
-    assert_eq!(sitemap.urls.len(), 1);
-    assert_eq!(sitemap.urls[0].loc.to_string(), "http://www.example.com/");
+    assert_eq!(sitemap.entries.len(), 1);
     assert_eq!(
-        sitemap.urls[0].last_mod,
+        sitemap.entries[0].loc.to_string(),
+        "http://www.example.com/"
+    );
+    assert_eq!(
+        sitemap.entries[0].last_mod,
         Some(W3CDateTime::Date("2005-01-01".parse::<NaiveDate>()?))
     );
-    assert_eq!(sitemap.urls[0].change_freq, Some(ChangeFreq::Monthly));
-    assert_eq!(sitemap.urls[0].priority, Some(Priority(0.8)));
+    assert_eq!(sitemap.entries[0].change_freq, Some(ChangeFreq::Monthly));
+    assert_eq!(sitemap.entries[0].priority, Some(Priority(0.8)));
 
     Ok(())
 }
@@ -36,14 +39,17 @@ fn test_parse_two_happy() -> Result<(), Error> {
 
     let sitemap = Sitemap::read_from(reader)?;
 
-    assert_eq!(sitemap.urls.len(), 2);
-    assert_eq!(sitemap.urls[1].loc.to_string(), "http://www.examples.com/");
+    assert_eq!(sitemap.entries.len(), 2);
     assert_eq!(
-        sitemap.urls[1].last_mod,
+        sitemap.entries[1].loc.to_string(),
+        "http://www.examples.com/"
+    );
+    assert_eq!(
+        sitemap.entries[1].last_mod,
         Some(W3CDateTime::Date("2006-01-01".parse::<NaiveDate>()?))
     );
-    assert_eq!(sitemap.urls[1].change_freq, Some(ChangeFreq::Weekly));
-    assert_eq!(sitemap.urls[1].priority, Some(Priority(0.5)));
+    assert_eq!(sitemap.entries[1].change_freq, Some(ChangeFreq::Weekly));
+    assert_eq!(sitemap.entries[1].priority, Some(Priority(0.5)));
 
     Ok(())
 }
@@ -57,10 +63,10 @@ fn test_parse_external_happy() -> Result<(), Error> {
 
     let sitemap = Sitemap::read_from(reader).unwrap();
 
-    assert_eq!(sitemap.urls.len(), 3);
-    assert_eq!(sitemap.urls[1].change_freq, Some(ChangeFreq::Monthly));
+    assert_eq!(sitemap.entries.len(), 3);
+    assert_eq!(sitemap.entries[1].change_freq, Some(ChangeFreq::Monthly));
     assert_eq!(
-        sitemap.urls[1].loc,
+        sitemap.entries[1].loc,
         "https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl2.xml"
     );
 

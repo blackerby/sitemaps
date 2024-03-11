@@ -2,6 +2,7 @@ use std::io::{BufRead, BufReader};
 
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
 use quick_xml::Reader;
+use serde::Serialize;
 use sitemap::Sitemap;
 use sitemap_index::SitemapIndex;
 
@@ -19,12 +20,18 @@ pub mod w3c_datetime;
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
 pub const MAX_URL_LENGTH: usize = 2048;
 
+/// Sitemaps are one of:
+/// - a Sitemap
+/// - a SitemapIndex
+#[derive(Serialize)]
 pub enum Sitemaps {
     Sitemap(Sitemap),
     SitemapIndex(SitemapIndex),
 }
 
 impl Sitemaps {
+    /// Reads a buffer and returns a Sitemap or SitemapIndex wrapped by the
+    /// Sitemaps enum wrapper.
     pub fn read<R: BufRead>(mut reader: R) -> Result<Self, Error> {
         let mut buf = String::new();
         reader.read_to_string(&mut buf)?;
@@ -39,7 +46,6 @@ impl Sitemaps {
                     e
                 ),
                 Ok(Event::Eof) => return Err(Error::UnexpectedEof),
-                Ok(Event::Decl(_)) => continue,
                 Ok(Event::Start(start)) => {
                     let buf_reader = BufReader::new(buf.as_bytes());
                     match start.name().as_ref() {
@@ -51,21 +57,25 @@ impl Sitemaps {
                             let sitemap_index = SitemapIndex::read_from(buf_reader)?;
                             return Ok(Self::SitemapIndex(sitemap_index));
                         }
-                        _ => break,
+                        _ => return Err(Error::NotASitemap),
                     }
                 }
-                _ => break,
+                _ => {}
             }
         }
-        Err(Error::NotASitemap)
     }
+}
+
+pub trait SitemapsEntry {
+    fn loc(&self) -> String;
+    fn last_mod(&self) -> String;
 }
 
 pub trait SitemapRead {
     fn read_from<R: BufRead>(reader: R) -> Result<Self, Error>
     where
         Self: Sized;
-    fn write<W: Write>(&self, writer: Writer<W>) -> Result<W, Error>;
+
     fn check_encoding(e: BytesDecl) -> Result<(), Error> {
         let encoding = e.encoding();
 
@@ -89,7 +99,10 @@ pub trait SitemapRead {
 
         Ok(url.as_str().into())
     }
+}
 
+pub trait SitemapWrite {
+    fn write<W: Write>(&self, writer: Writer<W>) -> Result<W, Error>;
     /// Serialize a Sitemap to a Writer as XML.
     fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
         self.write(Writer::new(writer))
@@ -108,4 +121,24 @@ pub trait SitemapRead {
 
         Ok(())
     }
+}
+
+impl Entries for Sitemaps {
+    fn locs(&self) -> Vec<String> {
+        match self {
+            Sitemaps::Sitemap(sitemap) => sitemap.locs(),
+            Sitemaps::SitemapIndex(index) => index.locs(),
+        }
+    }
+    fn lastmods(&self) -> Vec<String> {
+        match self {
+            Sitemaps::Sitemap(sitemap) => sitemap.lastmods(),
+            Sitemaps::SitemapIndex(index) => index.lastmods(),
+        }
+    }
+}
+
+pub trait Entries {
+    fn locs(&self) -> Vec<String>;
+    fn lastmods(&self) -> Vec<String>;
 }

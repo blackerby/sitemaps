@@ -2,7 +2,7 @@ use crate::cli::Cli;
 use comfy_table::Table;
 use csv::Writer;
 use serde_json;
-use sitemaps::sitemap::Sitemap;
+use sitemaps::{Entries, Sitemaps};
 use std::{error::Error, io::Write};
 use tabwriter::TabWriter;
 
@@ -10,7 +10,7 @@ const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 
 // TODO: move this serialization logic into the library and out of the cli
 // challenge will be removing the dependency on the Cli struct
-pub(crate) fn build_output(sitemap: Sitemap, cli: &Cli) -> Result<String, serde_json::Error> {
+pub(crate) fn build_output(sitemap: Sitemaps, cli: &Cli) -> Result<String, serde_json::Error> {
     if cli.json {
         return serde_json::to_string(&sitemap);
     }
@@ -79,7 +79,7 @@ fn transpose_columns(columns: Vec<Vec<String>>) -> Vec<Vec<String>> {
 }
 
 fn build_headers_and_columns(
-    sitemap: &Sitemap,
+    sitemap: &Sitemaps,
     cli: &Cli,
 ) -> (Vec<&'static str>, Vec<Vec<String>>) {
     let mut headers = vec![];
@@ -87,61 +87,47 @@ fn build_headers_and_columns(
 
     if cli.loc {
         headers.push(HEADERS[0]);
-        let locs = sitemap
-            .urls
-            .iter()
-            .map(|url| url.loc.to_string())
-            .collect::<Vec<String>>();
-
+        let locs = sitemap.locs();
         columns.push(locs);
     }
-    if cli.lastmod && sitemap.urls.iter().any(|url| url.last_mod.is_some()) {
+    if cli.lastmod {
         headers.push(HEADERS[1]);
-        let lastmods = sitemap
-            .urls
-            .iter()
-            .map(|url| {
-                if let Some(lastmod) = url.last_mod {
-                    lastmod.to_string()
-                } else {
-                    String::new()
-                }
-            })
-            .collect::<Vec<String>>();
-
+        let lastmods = sitemap.lastmods();
         columns.push(lastmods);
     }
-    if cli.changefreq && sitemap.urls.iter().any(|url| url.change_freq.is_some()) {
-        headers.push(HEADERS[2]);
-        let changefreqs = sitemap
-            .urls
-            .iter()
-            .map(|url| {
-                if let Some(changefreq) = url.change_freq {
-                    changefreq.to_string()
-                } else {
-                    String::new()
-                }
-            })
-            .collect::<Vec<String>>();
+    if let Sitemaps::Sitemap(sitemap) = sitemap {
+        if cli.changefreq && sitemap.entries.iter().any(|url| url.change_freq.is_some()) {
+            headers.push(HEADERS[2]);
+            let changefreqs = sitemap
+                .entries
+                .iter()
+                .map(|url| {
+                    if let Some(changefreq) = url.change_freq {
+                        changefreq.to_string()
+                    } else {
+                        String::new()
+                    }
+                })
+                .collect::<Vec<String>>();
 
-        columns.push(changefreqs);
-    }
-    if cli.priority && sitemap.urls.iter().any(|url| url.priority.is_some()) {
-        headers.push(HEADERS[3]);
-        let priorities = sitemap
-            .urls
-            .iter()
-            .map(|url| {
-                if let Some(priority) = url.priority {
-                    priority.to_string()
-                } else {
-                    String::new()
-                }
-            })
-            .collect::<Vec<String>>();
+            columns.push(changefreqs);
+        }
+        if cli.priority && sitemap.entries.iter().any(|url| url.priority.is_some()) {
+            headers.push(HEADERS[3]);
+            let priorities = sitemap
+                .entries
+                .iter()
+                .map(|url| {
+                    if let Some(priority) = url.priority {
+                        priority.to_string()
+                    } else {
+                        String::new()
+                    }
+                })
+                .collect::<Vec<String>>();
 
-        columns.push(priorities);
+            columns.push(priorities);
+        }
     }
 
     (headers, columns)

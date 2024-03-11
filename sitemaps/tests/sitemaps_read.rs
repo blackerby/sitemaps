@@ -18,14 +18,17 @@ fn test_parse_sitemap() -> Result<(), Error> {
         _ => unreachable!(),
     };
     assert_eq!(sitemap.namespace, sitemaps::NAMESPACE);
-    assert_eq!(sitemap.urls.len(), 1);
-    assert_eq!(sitemap.urls[0].loc.to_string(), "http://www.example.com/");
+    assert_eq!(sitemap.entries.len(), 1);
     assert_eq!(
-        sitemap.urls[0].last_mod,
+        sitemap.entries[0].loc.to_string(),
+        "http://www.example.com/"
+    );
+    assert_eq!(
+        sitemap.entries[0].last_mod,
         Some(W3CDateTime::Date("2005-01-01".parse::<NaiveDate>()?))
     );
-    assert_eq!(sitemap.urls[0].change_freq, Some(ChangeFreq::Monthly));
-    assert_eq!(sitemap.urls[0].priority, Some(Priority(0.8)));
+    assert_eq!(sitemap.entries[0].change_freq, Some(ChangeFreq::Monthly));
+    assert_eq!(sitemap.entries[0].priority, Some(Priority(0.8)));
     Ok(())
 }
 

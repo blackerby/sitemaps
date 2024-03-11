@@ -1,4 +1,4 @@
-use crate::NAMESPACE;
+use crate::{Entries, SitemapWrite, SitemapsEntry, NAMESPACE};
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, Event};
 use quick_xml::{Reader, Writer};
 use serde::Serialize;
@@ -28,6 +28,21 @@ impl SitemapIndex {
     }
 }
 
+impl Entries for SitemapIndex {
+    fn locs(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|entry| entry.loc())
+            .collect::<Vec<String>>()
+    }
+    fn lastmods(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|entry| entry.last_mod())
+            .collect::<Vec<String>>()
+    }
+}
+
 #[derive(Debug, PartialEq, Serialize)]
 pub struct SitemapEntry {
     pub loc: String,
@@ -40,6 +55,19 @@ impl SitemapEntry {
             loc: String::new(),
             last_mod: None,
         }
+    }
+}
+
+impl SitemapsEntry for SitemapEntry {
+    fn last_mod(&self) -> String {
+        if let Some(lastmod) = self.last_mod {
+            lastmod.to_string()
+        } else {
+            String::new()
+        }
+    }
+    fn loc(&self) -> String {
+        self.loc.to_string()
     }
 }
 
@@ -122,7 +150,9 @@ impl SitemapRead for SitemapIndex {
 
         Ok(sitemap_index)
     }
+}
 
+impl SitemapWrite for SitemapIndex {
     fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
         writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
 
