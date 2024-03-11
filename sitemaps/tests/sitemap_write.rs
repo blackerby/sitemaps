@@ -60,7 +60,7 @@ fn test_new_sitemap() -> Result<(), Error> {
     urls.push(url_entry);
 
     let mut sitemap = Sitemap::new();
-    sitemap.urls = urls;
+    sitemap.entries = urls;
 
     let mut buf = Vec::new();
     let written = sitemap.write_to(&mut buf)?;

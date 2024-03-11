@@ -87,19 +87,19 @@ fn build_headers_and_columns(
 
     if cli.loc {
         headers.push(HEADERS[0]);
-        let locs = sitemap.write_locs();
+        let locs = sitemap.locs();
         columns.push(locs);
     }
     if cli.lastmod {
         headers.push(HEADERS[1]);
-        let lastmods = sitemap.write_lastmods();
+        let lastmods = sitemap.lastmods();
         columns.push(lastmods);
     }
     if let Sitemaps::Sitemap(sitemap) = sitemap {
-        if cli.changefreq && sitemap.urls.iter().any(|url| url.change_freq.is_some()) {
+        if cli.changefreq && sitemap.entries.iter().any(|url| url.change_freq.is_some()) {
             headers.push(HEADERS[2]);
             let changefreqs = sitemap
-                .urls
+                .entries
                 .iter()
                 .map(|url| {
                     if let Some(changefreq) = url.change_freq {
@@ -112,10 +112,10 @@ fn build_headers_and_columns(
 
             columns.push(changefreqs);
         }
-        if cli.priority && sitemap.urls.iter().any(|url| url.priority.is_some()) {
+        if cli.priority && sitemap.entries.iter().any(|url| url.priority.is_some()) {
             headers.push(HEADERS[3]);
             let priorities = sitemap
-                .urls
+                .entries
                 .iter()
                 .map(|url| {
                     if let Some(priority) = url.priority {

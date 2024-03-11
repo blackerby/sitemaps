@@ -28,6 +28,21 @@ impl SitemapIndex {
     }
 }
 
+impl SitemapWrite for SitemapIndex {
+    fn locs(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|entry| entry.loc())
+            .collect::<Vec<String>>()
+    }
+    fn lastmods(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|entry| entry.last_mod())
+            .collect::<Vec<String>>()
+    }
+}
+
 #[derive(Debug, PartialEq, Serialize)]
 pub struct SitemapEntry {
     pub loc: String,
@@ -44,29 +59,15 @@ impl SitemapEntry {
 }
 
 impl SitemapsEntry for SitemapEntry {
-    fn get_loc(&self) -> String {
+    fn last_mod(&self) -> String {
+        if let Some(lastmod) = self.last_mod {
+            lastmod.to_string()
+        } else {
+            String::new()
+        }
+    }
+    fn loc(&self) -> String {
         self.loc.to_string()
-    }
-}
-
-impl SitemapWrite for SitemapIndex {
-    fn write_locs(&self) -> Vec<String> {
-        self.entries
-            .iter()
-            .map(|url| url.get_loc())
-            .collect::<Vec<String>>()
-    }
-    fn write_lastmods(&self) -> Vec<String> {
-        self.entries
-            .iter()
-            .map(|url| {
-                if let Some(lastmod) = url.last_mod {
-                    lastmod.to_string()
-                } else {
-                    String::new()
-                }
-            })
-            .collect::<Vec<String>>()
     }
 }
 

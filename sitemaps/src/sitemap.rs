@@ -16,7 +16,7 @@ pub struct Sitemap {
     pub schema_instance: Option<String>,
     pub schema_location: Option<String>,
     pub namespace: String,
-    pub urls: Vec<UrlEntry>,
+    pub entries: Vec<UrlEntry>,
 }
 
 impl Sitemap {
@@ -25,28 +25,36 @@ impl Sitemap {
             schema_instance: None,
             schema_location: None,
             namespace: String::new(),
-            urls: vec![],
+            entries: vec![],
+        }
+    }
+}
+
+impl SitemapsEntry for UrlEntry {
+    fn loc(&self) -> String {
+        self.loc.to_string()
+    }
+
+    fn last_mod(&self) -> String {
+        if let Some(lastmod) = self.last_mod {
+            lastmod.to_string()
+        } else {
+            String::new()
         }
     }
 }
 
 impl SitemapWrite for Sitemap {
-    fn write_locs(&self) -> Vec<String> {
-        self.urls
+    fn locs(&self) -> Vec<String> {
+        self.entries
             .iter()
-            .map(|url| url.get_loc())
+            .map(|entry| entry.loc())
             .collect::<Vec<String>>()
     }
-    fn write_lastmods(&self) -> Vec<String> {
-        self.urls
+    fn lastmods(&self) -> Vec<String> {
+        self.entries
             .iter()
-            .map(|url| {
-                if let Some(lastmod) = url.last_mod {
-                    lastmod.to_string()
-                } else {
-                    String::new()
-                }
-            })
+            .map(|entry| entry.last_mod())
             .collect::<Vec<String>>()
     }
 }
@@ -126,7 +134,7 @@ impl SitemapRead for Sitemap {
                             return Err(Error::TooManyUrls);
                         }
 
-                        sitemap.urls.push(url);
+                        sitemap.entries.push(url);
                         url = UrlEntry::new();
                     }
                 }
@@ -156,7 +164,7 @@ impl SitemapRead for Sitemap {
         element.push_attribute(("xmlns", namespace));
         writer.write_event(Event::Start(element))?;
 
-        for url_entry in &self.urls {
+        for url_entry in &self.entries {
             let inner_name = "url";
             writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
 
@@ -230,12 +238,6 @@ impl UrlEntry {
             change_freq: None,
             priority: None,
         }
-    }
-}
-
-impl SitemapsEntry for UrlEntry {
-    fn get_loc(&self) -> String {
-        self.loc.to_string()
     }
 }
 

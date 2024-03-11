@@ -61,19 +61,9 @@ impl Sitemaps {
     }
 }
 
-impl SitemapWrite for Sitemaps {
-    fn write_locs(&self) -> Vec<String> {
-        match self {
-            Sitemaps::Sitemap(sitemap) => sitemap.write_locs(),
-            Sitemaps::SitemapIndex(index) => index.write_locs(),
-        }
-    }
-    fn write_lastmods(&self) -> Vec<String> {
-        match self {
-            Sitemaps::Sitemap(sitemap) => sitemap.write_lastmods(),
-            Sitemaps::SitemapIndex(index) => index.write_lastmods(),
-        }
-    }
+pub trait SitemapsEntry {
+    fn loc(&self) -> String;
+    fn last_mod(&self) -> String;
 }
 
 pub trait SitemapRead {
@@ -125,11 +115,22 @@ pub trait SitemapRead {
     }
 }
 
-pub trait SitemapsEntry {
-    fn get_loc(&self) -> String;
+pub trait SitemapWrite {
+    fn locs(&self) -> Vec<String>;
+    fn lastmods(&self) -> Vec<String>;
 }
 
-pub trait SitemapWrite {
-    fn write_locs(&self) -> Vec<String>;
-    fn write_lastmods(&self) -> Vec<String>;
+impl SitemapWrite for Sitemaps {
+    fn locs(&self) -> Vec<String> {
+        match self {
+            Sitemaps::Sitemap(sitemap) => sitemap.locs(),
+            Sitemaps::SitemapIndex(index) => index.locs(),
+        }
+    }
+    fn lastmods(&self) -> Vec<String> {
+        match self {
+            Sitemaps::Sitemap(sitemap) => sitemap.lastmods(),
+            Sitemaps::SitemapIndex(index) => index.lastmods(),
+        }
+    }
 }
