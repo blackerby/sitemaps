@@ -121,7 +121,7 @@ impl SitemapRead for SitemapIndex {
                             Ok(Event::Text(e)) => {
                                 let text = e.unescape()?.to_string();
                                 match start.name().as_ref() {
-                                    b"loc" => entry.loc.push_str(&text),
+                                    b"loc" => Self::validate_url(&entry.loc)?.push_str(&text),
                                     b"lastmod" => entry.last_mod = Some(W3CDateTime::new(&text)?),
                                     _ => {}
                                 }
