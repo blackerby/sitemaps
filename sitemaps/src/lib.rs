@@ -90,7 +90,7 @@ pub trait SitemapRead {
         }
         Ok(())
     }
-    fn validate_url(string: &str) -> Result<String, Error> {
+    fn _validate_url(string: &str) -> Result<String, Error> {
         if string.chars().count() > MAX_URL_LENGTH {
             return Err(Error::UrlValueTooLong);
         }

@@ -157,7 +157,7 @@ impl SitemapRead for Sitemap {
                             Ok(Event::Text(e)) => {
                                 let text = e.unescape()?.to_string();
                                 match start.name().as_ref() {
-                                    b"loc" => Self::validate_url(&url.loc)?.push_str(&text),
+                                    b"loc" => url.loc.push_str(&text),
                                     b"lastmod" => url.last_mod = Some(W3CDateTime::new(&text)?),
                                     b"priority" => {
                                         url.priority = Some(Priority::new(text.parse()?)?)
