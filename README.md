@@ -15,9 +15,9 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### Lib
 
-- [ ] use `thiserror`
 - [ ] document!
 
 ### CLI
 
 - [ ] test with `assert_cmd`
+- [ ] print error messages
