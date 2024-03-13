@@ -9,7 +9,7 @@ use crate::error::Error;
 use crate::w3c_datetime::W3CDateTime;
 use crate::SitemapRead;
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct SitemapIndex {
     pub entries: Vec<SitemapEntry>,
     pub schema_instance: Option<String>,
@@ -43,7 +43,7 @@ impl Entries for SitemapIndex {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct SitemapEntry {
     pub loc: String,
     pub last_mod: Option<W3CDateTime>,

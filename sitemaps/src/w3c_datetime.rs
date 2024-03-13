@@ -22,8 +22,8 @@ impl W3CDateTime {
         } else {
             Ok(W3CDateTime::DateTime(
                 DateTime::parse_from_rfc3339(string)?,
-                string.contains("."),
-                string.to_uppercase().ends_with("Z"),
+                string.contains('.'),
+                string.to_uppercase().ends_with('Z'),
             ))
         }
     }

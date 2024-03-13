@@ -22,9 +22,10 @@ fn main() -> Result<(), Error> {
 
         let sitemap = Sitemaps::read(reader)?;
 
-        let output = build_output(sitemap, &cli).unwrap();
-
-        println!("{}", output.trim_end());
+        match build_output(sitemap, &cli) {
+            Ok(output) => println!("{}", output.trim_end()),
+            Err(err) => println!("{}", err.to_string()),
+        }
     }
 
     Ok(())
