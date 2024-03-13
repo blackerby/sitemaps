@@ -17,7 +17,6 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 - [ ] use `thiserror`
 - [ ] document!
-- [ ] extract validation code
 
 ### CLI
 

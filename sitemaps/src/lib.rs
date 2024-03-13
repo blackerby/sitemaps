@@ -69,6 +69,15 @@ impl Sitemaps {
 pub trait SitemapsEntry {
     fn loc(&self) -> String;
     fn last_mod(&self) -> String;
+    fn validate_loc(&self) -> Result<String, Error> {
+        if self.loc().chars().count() > MAX_URL_LENGTH {
+            return Err(Error::UrlValueTooLong);
+        }
+
+        let url = Url::parse(&self.loc())?;
+
+        Ok(url.as_str().into())
+    }
 }
 
 pub trait SitemapRead {
@@ -89,15 +98,6 @@ pub trait SitemapRead {
             }
         }
         Ok(())
-    }
-    fn _validate_url(string: &str) -> Result<String, Error> {
-        if string.chars().count() > MAX_URL_LENGTH {
-            return Err(Error::UrlValueTooLong);
-        }
-
-        let url = Url::parse(string)?;
-
-        Ok(url.as_str().into())
     }
 }
 

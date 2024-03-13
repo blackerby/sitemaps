@@ -252,15 +252,19 @@ impl Default for UrlEntry {
 impl Priority {
     /// Create a new, valid Priority.
     pub fn new(priority: f32) -> Result<Self, Error> {
-        if priority < 0.0 {
+        Ok(Self(priority))
+    }
+
+    pub fn validate(&self) -> Result<Self, Error> {
+        if self.0 < 0.0 {
             return Err(Error::PriorityTooLow);
         }
 
-        if priority > 1.0 {
+        if self.0 > 1.0 {
             return Err(Error::PriorityTooHigh);
         }
 
-        Ok(Self(priority))
+        Ok(self.to_owned())
     }
 }
 
