@@ -1,0 +1,25 @@
+{
+  "SitemapIndex": {
+    "entries": [
+      {
+        "loc": "http://www.example.com/sitemap1.xml.gz",
+        "last_mod": {
+          "DateTime": [
+            "2004-10-01T18:23:17Z",
+            false,
+            false
+          ]
+        }
+      },
+      {
+        "loc": "http://www.example.com/sitemap2.xml.gz",
+        "last_mod": {
+          "Date": "2005-01-01"
+        }
+      }
+    ],
+    "schema_instance": null,
+    "schema_location": null,
+    "namespace": "http://www.sitemaps.org/schemas/sitemap/0.9"
+  }
+}

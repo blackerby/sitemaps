@@ -1,0 +1,25 @@
+{
+  "Sitemap": {
+    "schema_instance": null,
+    "schema_location": null,
+    "namespace": "http://www.sitemaps.org/schemas/sitemap/0.9",
+    "entries": [
+      {
+        "loc": "http://www.example.com/",
+        "last_mod": {
+          "Date": "2005-01-01"
+        },
+        "change_freq": "Monthly",
+        "priority": 0.8
+      },
+      {
+        "loc": "http://www.examples.com/",
+        "last_mod": {
+          "Date": "2006-01-01"
+        },
+        "change_freq": "Weekly",
+        "priority": 0.5
+      }
+    ]
+  }
+}

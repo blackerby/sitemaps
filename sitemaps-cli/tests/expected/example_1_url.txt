@@ -1,0 +1,2 @@
+loc                      lastmod     changefreq  priority
+http://www.example.com/  2005-01-01  monthly     0.8
