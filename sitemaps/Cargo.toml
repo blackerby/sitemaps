@@ -8,6 +8,7 @@ chrono = {version = "0.4.34", features = ["alloc", "serde"] }
 quick-xml = "0.31.0"
 url = "2.5.0"
 serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0.58"
 
 [dev-dependencies]
 ureq = "2.9.6"
