@@ -7,7 +7,7 @@ use clap::Parser;
 pub(crate) struct Cli {
     #[arg(default_value = "-")]
     pub path: Option<String>,
-    #[arg(short, long)]
+    #[arg(short, long, default_value_t = true)]
     pub loc: bool,
     #[arg(short = 'L', long)]
     pub lastmod: bool,
@@ -17,7 +17,7 @@ pub(crate) struct Cli {
     pub priority: bool,
     #[arg(short = 'P', long)]
     pub pretty: bool,
-    #[arg(short = 'H', long)]
+    #[arg(short = 'H', long, default_value_t = true)]
     pub header: bool,
     #[arg(short, long)]
     pub json: bool,

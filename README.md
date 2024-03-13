@@ -20,6 +20,4 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 
 ### CLI
 
-- [ ] adjust some flag defaults
-- [ ] adjust flags for sitemap indexes
 - [ ] test with `assert_cmd`
