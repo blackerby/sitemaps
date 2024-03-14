@@ -66,9 +66,17 @@ impl Sitemaps {
     }
 }
 
+/// A trait to support entries in sitemap and sitemap index files. In a sitemap file,
+/// an entry is indicated by a `<url>` element. In a sitemap index file, an entry is
+/// indicated by a `<sitemap>` element. Both elements have a required ``<loc>`` child element
+/// and an optional ``<lastmod>`` element.
 pub trait SitemapsEntry {
+    /// Return the text value of the entry's ``<loc>`` element, a URL.
     fn loc(&self) -> String;
+    /// Return the value of the entry's ``<lastmod>`` element as a
+    /// formatted date string.
     fn last_mod(&self) -> String;
+    /// Validate the URL contained in the entry's ``<loc>`` element.
     fn validate_loc(&self) -> Result<String, Error> {
         if self.loc().chars().count() > MAX_URL_LENGTH {
             return Err(Error::UrlValueTooLong);
@@ -80,11 +88,14 @@ pub trait SitemapsEntry {
     }
 }
 
+/// A trait to support reading from sitemap and sitemap index files.
 pub trait SitemapRead {
+    /// Read from a buffer and try to return a Sitemap or a SitemapIndex.
     fn read_from<R: BufRead>(reader: R) -> Result<Self, Error>
     where
         Self: Sized;
 
+    /// Check that the encoding of the file being read from is UTF-8.
     fn check_encoding(e: BytesDecl) -> Result<(), Error> {
         let encoding = e.encoding();
 
@@ -101,13 +112,17 @@ pub trait SitemapRead {
     }
 }
 
+/// A trait to support writing `Sitemap`s and `SitemapIndex`es to files
+/// as XML.
 pub trait SitemapWrite {
     fn write<W: Write>(&self, writer: Writer<W>) -> Result<W, Error>;
+
     /// Serialize a Sitemap to a Writer as XML.
     fn write_to<W: Write>(&self, writer: W) -> Result<W, Error> {
         self.write(Writer::new(writer))
     }
 
+    /// Write an XML text element.
     fn write_text_element<W: Write, N: AsRef<str>, T: AsRef<str>>(
         writer: &mut Writer<W>,
         name: N,
@@ -123,6 +138,15 @@ pub trait SitemapWrite {
     }
 }
 
+/// A trait to support collecting `<loc>` and `<lastmod>` values
+/// from `SitemapEntry`s.
+pub trait Entries {
+    /// Collect the all `<loc>`s from the Sitemap or SitemapIndex.
+    fn locs(&self) -> Vec<String>;
+    /// Collect the all `<lastmod>`s from the Sitemap or SitemapIndex.
+    fn lastmods(&self) -> Vec<String>;
+}
+
 impl Entries for Sitemaps {
     fn locs(&self) -> Vec<String> {
         match self {
@@ -136,9 +160,4 @@ impl Entries for Sitemaps {
             Sitemaps::SitemapIndex(index) => index.lastmods(),
         }
     }
-}
-
-pub trait Entries {
-    fn locs(&self) -> Vec<String>;
-    fn lastmods(&self) -> Vec<String>;
 }

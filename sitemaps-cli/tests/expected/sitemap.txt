@@ -1,0 +1,4 @@
+loc                                                                  lastmod                   changefreq  priority
+https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl1.xml  2023-05-19T14:48:04.488Z  monthly     1.0
+https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl2.xml  2023-05-19T14:48:04.883Z  monthly     1.0
+https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl3.xml  2023-04-17T14:54:05.011Z  monthly     1.0

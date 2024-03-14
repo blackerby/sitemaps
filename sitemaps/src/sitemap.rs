@@ -10,7 +10,7 @@ use crate::{error::Error, w3c_datetime::W3CDateTime};
 
 /// A Sitemap is an entity-escaped, UTF-8 encoded list of `<url>` elements contained
 /// in a `<urlset>` element.
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct Sitemap {
     /// The set of URLs in the sitemap.
     pub schema_instance: Option<String>,
@@ -193,7 +193,7 @@ impl SitemapRead for Sitemap {
 }
 
 /// `<urlset>` is the XML root element. Here it is represented as a list of URLs.
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, Default, PartialEq, Serialize)]
 pub struct Urlset {
     pub schema_instance: Option<String>,
     pub schema_location: Option<String>,
@@ -219,7 +219,7 @@ pub struct Priority(pub f32);
 
 /// A URL entry. It is a parent XML tag containing the required `<loc>` element
 /// and the three optional `<lastmod>`, `<changrefreq>`, and `<priority>` elements.
-#[derive(Debug, PartialEq, Clone, Serialize)]
+#[derive(Debug, Default, PartialEq, Clone, Serialize)]
 pub struct UrlEntry {
     /// The URL of the described page. It is required.
     pub loc: String,
@@ -243,18 +243,13 @@ impl UrlEntry {
     }
 }
 
-impl Default for UrlEntry {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Priority {
     /// Create a new, valid Priority.
     pub fn new(priority: f32) -> Result<Self, Error> {
         Ok(Self(priority))
     }
 
+    /// Validate that `<priority>` falls within the 0.0 to 1.0 range.
     pub fn validate(&self) -> Result<Self, Error> {
         if self.0 < 0.0 {
             return Err(Error::PriorityTooLow);

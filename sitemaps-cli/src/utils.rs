@@ -12,7 +12,7 @@ const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 // challenge will be removing the dependency on the Cli struct
 pub(crate) fn build_output(sitemap: Sitemaps, cli: &Cli) -> Result<String, serde_json::Error> {
     if cli.json {
-        return serde_json::to_string(&sitemap);
+        return serde_json::to_string_pretty(&sitemap);
     }
 
     let (headers, columns) = build_headers_and_columns(&sitemap, cli);

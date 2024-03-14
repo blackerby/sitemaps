@@ -1,0 +1,45 @@
+{
+  "Sitemap": {
+    "schema_instance": "http://www.w3.org/2001/XMLSchema-instance",
+    "schema_location": "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd",
+    "namespace": "http://www.sitemaps.org/schemas/sitemap/0.9",
+    "entries": [
+      {
+        "loc": "https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl1.xml",
+        "last_mod": {
+          "DateTime": [
+            "2023-05-19T14:48:04.488Z",
+            true,
+            true
+          ]
+        },
+        "change_freq": "Monthly",
+        "priority": 1.0
+      },
+      {
+        "loc": "https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl2.xml",
+        "last_mod": {
+          "DateTime": [
+            "2023-05-19T14:48:04.883Z",
+            true,
+            true
+          ]
+        },
+        "change_freq": "Monthly",
+        "priority": 1.0
+      },
+      {
+        "loc": "https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl3.xml",
+        "last_mod": {
+          "DateTime": [
+            "2023-04-17T14:54:05.011Z",
+            true,
+            true
+          ]
+        },
+        "change_freq": "Monthly",
+        "priority": 1.0
+      }
+    ]
+  }
+}

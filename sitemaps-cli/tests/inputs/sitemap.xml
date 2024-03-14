@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">  <url>
+    <loc>https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl1.xml</loc>
+    <lastmod>2023-05-19T14:48:04.488Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl2.xml</loc>
+    <lastmod>2023-05-19T14:48:04.883Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.govinfo.gov/bulkdata/PLAW/117/private/PLAW-117pvtl3.xml</loc>
+    <lastmod>2023-04-17T14:54:05.011Z</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
