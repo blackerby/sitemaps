@@ -20,10 +20,11 @@ fn main() -> Result<(), Error> {
             _ => Box::new(BufReader::new(File::open(path)?)),
         };
 
-        let sitemap = Sitemaps::read(reader)?;
-
-        match build_output(sitemap, &cli) {
-            Ok(output) => println!("{}", output.trim_end()),
+        match Sitemaps::read(reader) {
+            Ok(sitemap) => match build_output(sitemap, &cli) {
+                Ok(output) => println!("{}", output.trim_end()),
+                Err(err) => println!("{}", err.to_string()),
+            },
             Err(err) => println!("{}", err.to_string()),
         }
     }

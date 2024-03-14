@@ -249,6 +249,7 @@ impl Priority {
         Ok(Self(priority))
     }
 
+    /// Validate that <priority> falls within the 0.0 to 1.0 range.
     pub fn validate(&self) -> Result<Self, Error> {
         if self.0 < 0.0 {
             return Err(Error::PriorityTooLow);

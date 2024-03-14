@@ -20,4 +20,3 @@ I want Sitemaps to be easy for a new Rust programmer to understand, because I am
 ### CLI
 
 - [ ] test with `assert_cmd`
-- [ ] print error messages

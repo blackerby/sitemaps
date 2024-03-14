@@ -43,6 +43,8 @@ impl Entries for SitemapIndex {
     }
 }
 
+/// A entry in a sitemap index file. It is a parent XML tag containing the required `<loc>` element
+/// and the `<lastmod>` elements.
 #[derive(Debug, Default, PartialEq, Serialize)]
 pub struct SitemapEntry {
     pub loc: String,

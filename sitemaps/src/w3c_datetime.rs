@@ -2,9 +2,7 @@ use chrono::{DateTime, FixedOffset, NaiveDate, ParseError};
 use serde::Serialize;
 use std::fmt;
 
-// https://developers.google.com/search/blog/2006/04/using-lastmod-attribute
-// https://www.w3.org/TR/NOTE-datetime
-
+/// A W3CDateTime is an ISO-8601 date or an RFC-3339 datetime.
 #[derive(Debug, PartialEq, Clone, Copy, Serialize)]
 pub enum W3CDateTime {
     DateTime(DateTime<FixedOffset>, bool, bool),
@@ -12,6 +10,11 @@ pub enum W3CDateTime {
 }
 
 impl W3CDateTime {
+    /// Create a new W3CDateTime by parsing a string.
+    /// "YYYY-MM-DD" formatted strings will return a
+    /// `W3CDateTime::Date`. "YYYY-MM-DDThh:mm:ssTZD"
+    /// and "YYYY-MM-DDThh:mm:ss.sTZD" formatted strings
+    /// will return a `W3CDateTime::DateTime`.
     pub fn new(string: &str) -> Result<W3CDateTime, ParseError> {
         Self::parse(string)
     }
