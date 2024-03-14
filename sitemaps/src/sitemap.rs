@@ -117,7 +117,6 @@ impl SitemapRead for Sitemap {
         let mut sitemap = Sitemap::new();
 
         let mut url = UrlEntry::new();
-        let mut url_count: u32 = 0;
         loop {
             match reader.read_event_into(&mut buf) {
                 Err(e) => panic!("Error at position {}: {:?}", reader.buffer_position(), e),
@@ -174,12 +173,6 @@ impl SitemapRead for Sitemap {
                 }
                 Ok(Event::End(e)) => {
                     if e.name().as_ref() == b"url" {
-                        url_count += 1;
-
-                        if url_count > 50_000 {
-                            return Err(Error::TooManyUrls);
-                        }
-
                         sitemap.entries.push(url);
                         url = UrlEntry::new();
                     }
@@ -189,26 +182,6 @@ impl SitemapRead for Sitemap {
             buf.clear();
         }
         Ok(sitemap)
-    }
-}
-
-/// `<urlset>` is the XML root element. Here it is represented as a list of URLs.
-#[derive(Debug, Default, PartialEq, Serialize)]
-pub struct Urlset {
-    pub schema_instance: Option<String>,
-    pub schema_location: Option<String>,
-    pub namespace: String,
-    pub urls: Vec<UrlEntry>,
-}
-
-impl Urlset {
-    pub fn new() -> Self {
-        Self {
-            schema_instance: None,
-            schema_location: None,
-            namespace: String::new(),
-            urls: vec![],
-        }
     }
 }
 

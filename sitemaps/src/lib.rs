@@ -20,6 +20,7 @@ pub mod w3c_datetime;
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
 pub const MAX_URL_LENGTH: usize = 2048;
 
+/// A type representing Sitemaps.
 /// Sitemaps are one of:
 /// - a Sitemap
 /// - a SitemapIndex
