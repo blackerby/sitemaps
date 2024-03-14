@@ -24,14 +24,14 @@ pub enum Error {
     /// An error when an incorrect encoding declaration is encountered.
     #[error("Sitemap encoding error. Must be \"utf-8\"")]
     EncodingError,
-    /// An error for an incorrectly formed URL in a <loc> element.
+    /// An error for an incorrectly formed URL in a `<loc>` element.
     #[error("Invalid URL error")]
     UrlParseError(#[from] UrlParseError),
-    /// An error when there are more than 50,000 <url> elements in a sitemap file
-    /// or more than 50,000 <sitemap> elements in a sitemap index file.
+    /// An error when there are more than 50,000 `<url>` elements in a sitemap file
+    /// or more than 50,000 `<sitemap>` elements in a sitemap index file.
     #[error("Too many URLs in document. Cannot exceed 50,000.")]
     TooManyUrls,
-    /// An error when a url in a <loc> element exceeds 2048 characters in length.
+    /// An error when a url in a `<loc>` element exceeds 2048 characters in length.
     #[error("URL exceeds length limit: must not be more than 2048 characters.")]
     UrlValueTooLong,
     /// An error when a priority value is less than 0.0.

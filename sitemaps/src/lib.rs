@@ -67,16 +67,16 @@ impl Sitemaps {
 }
 
 /// A trait to support entries in sitemap and sitemap index files. In a sitemap file,
-/// an entry is indicated by a <url> element. In a sitemap index file, an entry is
-/// indicated by a <sitemap> element. Both elements have a required <loc> child element
-/// and an optional <lastmod> element.
+/// an entry is indicated by a `<url>` element. In a sitemap index file, an entry is
+/// indicated by a `<sitemap>` element. Both elements have a required ``<loc>`` child element
+/// and an optional ``<lastmod>`` element.
 pub trait SitemapsEntry {
-    /// Return the text value of the entry's <loc> element, a URL.
+    /// Return the text value of the entry's ``<loc>`` element, a URL.
     fn loc(&self) -> String;
-    /// Return the value of the entry's <lastmod> element as a
+    /// Return the value of the entry's ``<lastmod>`` element as a
     /// formatted date string.
     fn last_mod(&self) -> String;
-    /// Validate the URL contained in the entry's <loc> element.
+    /// Validate the URL contained in the entry's ``<loc>`` element.
     fn validate_loc(&self) -> Result<String, Error> {
         if self.loc().chars().count() > MAX_URL_LENGTH {
             return Err(Error::UrlValueTooLong);
@@ -138,12 +138,12 @@ pub trait SitemapWrite {
     }
 }
 
-/// A trait to support collecting <loc> and <lastmod> values
+/// A trait to support collecting `<loc>` and `<lastmod>` values
 /// from `SitemapEntry`s.
 pub trait Entries {
-    /// Collect the all <loc>s from the Sitemap or SitemapIndex.
+    /// Collect the all `<loc>`s from the Sitemap or SitemapIndex.
     fn locs(&self) -> Vec<String>;
-    /// Collect the all <lastmod>s from the Sitemap or SitemapIndex.
+    /// Collect the all `<lastmod>`s from the Sitemap or SitemapIndex.
     fn lastmods(&self) -> Vec<String>;
 }
 
