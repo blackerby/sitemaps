@@ -1,4 +1,4 @@
-use crate::{Entries, SitemapRead, SitemapWrite, SitemapsEntry, NAMESPACE};
+use crate::{Entries, SitemapsEntry, NAMESPACE};
 use core::fmt;
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, Event};
 use quick_xml::reader::Reader;
@@ -6,7 +6,7 @@ use quick_xml::writer::Writer;
 use serde::Serialize;
 use std::io::{BufRead, Write};
 
-use crate::{error::Error, w3c_datetime::W3CDateTime};
+use crate::{error::Error, w3c_datetime::W3CDateTime, Sitemaps};
 
 /// A Sitemap is an entity-escaped, UTF-8 encoded list of `<url>` elements contained
 /// in a `<urlset>` element.
@@ -19,8 +19,8 @@ pub struct Sitemap {
     pub entries: Vec<UrlEntry>,
 }
 
-impl Sitemap {
-    pub fn new() -> Self {
+impl Sitemaps for Sitemap {
+    fn new() -> Self {
         Self {
             schema_instance: None,
             schema_location: None,
@@ -28,85 +28,7 @@ impl Sitemap {
             entries: vec![],
         }
     }
-}
 
-impl SitemapsEntry for UrlEntry {
-    fn loc(&self) -> String {
-        self.loc.to_string()
-    }
-
-    fn last_mod(&self) -> String {
-        if let Some(lastmod) = self.last_mod {
-            lastmod.to_string()
-        } else {
-            String::new()
-        }
-    }
-}
-
-impl Entries for Sitemap {
-    fn locs(&self) -> Vec<String> {
-        self.entries
-            .iter()
-            .map(|entry| entry.loc())
-            .collect::<Vec<String>>()
-    }
-    fn lastmods(&self) -> Vec<String> {
-        self.entries
-            .iter()
-            .map(|entry| entry.last_mod())
-            .collect::<Vec<String>>()
-    }
-}
-
-impl SitemapWrite for Sitemap {
-    fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
-        writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
-
-        let name = "urlset";
-        let mut element = BytesStart::new(name);
-        if let Some(ref schema_instance) = self.schema_instance {
-            element.push_attribute(("xmlns:xsi", schema_instance.as_str()));
-        }
-        if let Some(ref schema_location) = self.schema_location {
-            element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
-        }
-        let namespace = if self.namespace.is_empty() {
-            NAMESPACE
-        } else {
-            self.namespace.as_str()
-        };
-        element.push_attribute(("xmlns", namespace));
-        writer.write_event(Event::Start(element))?;
-
-        for url_entry in &self.entries {
-            let inner_name = "url";
-            writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
-
-            Self::write_text_element(&mut writer, "loc", url_entry.loc.clone())?;
-
-            if let Some(lastmod) = url_entry.last_mod {
-                Self::write_text_element(&mut writer, "lastmod", lastmod.to_string())?;
-            }
-
-            if let Some(changefreq) = url_entry.change_freq {
-                Self::write_text_element(&mut writer, "changefreq", changefreq.to_string())?;
-            }
-
-            if let Some(priority) = url_entry.priority {
-                Self::write_text_element(&mut writer, "priority", priority.to_string())?;
-            }
-
-            writer.write_event(Event::End(BytesEnd::new(inner_name)))?;
-        }
-
-        writer.write_event(Event::End(BytesEnd::new(name)))?;
-        Ok(writer.into_inner())
-    }
-}
-
-impl SitemapRead for Sitemap {
-    /// Read a sitemap from a Reader.
     fn read_from<R: BufRead>(reader: R) -> Result<Sitemap, Error> {
         let mut reader = Reader::from_reader(reader);
         reader.trim_text(true).expand_empty_elements(true);
@@ -182,6 +104,78 @@ impl SitemapRead for Sitemap {
             buf.clear();
         }
         Ok(sitemap)
+    }
+    fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
+        writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
+
+        let name = "urlset";
+        let mut element = BytesStart::new(name);
+        if let Some(ref schema_instance) = self.schema_instance {
+            element.push_attribute(("xmlns:xsi", schema_instance.as_str()));
+        }
+        if let Some(ref schema_location) = self.schema_location {
+            element.push_attribute(("xsi:schemaLocation", schema_location.as_str()));
+        }
+        let namespace = if self.namespace.is_empty() {
+            NAMESPACE
+        } else {
+            self.namespace.as_str()
+        };
+        element.push_attribute(("xmlns", namespace));
+        writer.write_event(Event::Start(element))?;
+
+        for url_entry in &self.entries {
+            let inner_name = "url";
+            writer.write_event(Event::Start(BytesStart::new(inner_name)))?;
+
+            Self::write_text_element(&mut writer, "loc", url_entry.loc.clone())?;
+
+            if let Some(lastmod) = url_entry.last_mod {
+                Self::write_text_element(&mut writer, "lastmod", lastmod.to_string())?;
+            }
+
+            if let Some(changefreq) = url_entry.change_freq {
+                Self::write_text_element(&mut writer, "changefreq", changefreq.to_string())?;
+            }
+
+            if let Some(priority) = url_entry.priority {
+                Self::write_text_element(&mut writer, "priority", priority.to_string())?;
+            }
+
+            writer.write_event(Event::End(BytesEnd::new(inner_name)))?;
+        }
+
+        writer.write_event(Event::End(BytesEnd::new(name)))?;
+        Ok(writer.into_inner())
+    }
+}
+
+impl SitemapsEntry for UrlEntry {
+    fn loc(&self) -> String {
+        self.loc.to_string()
+    }
+
+    fn last_mod(&self) -> String {
+        if let Some(lastmod) = self.last_mod {
+            lastmod.to_string()
+        } else {
+            String::new()
+        }
+    }
+}
+
+impl Entries for Sitemap {
+    fn locs(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|entry| entry.loc())
+            .collect::<Vec<String>>()
+    }
+    fn lastmods(&self) -> Vec<String> {
+        self.entries
+            .iter()
+            .map(|entry| entry.last_mod())
+            .collect::<Vec<String>>()
     }
 }
 

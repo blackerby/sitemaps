@@ -9,7 +9,7 @@ use crate::utils::build_output;
 use clap::Parser;
 
 use sitemaps::error::Error;
-use sitemaps::Sitemaps;
+use sitemaps::SitemapsFile;
 
 fn main() -> Result<(), Error> {
     let cli = Cli::parse();
@@ -20,7 +20,7 @@ fn main() -> Result<(), Error> {
             _ => Box::new(BufReader::new(File::open(path)?)),
         };
 
-        match Sitemaps::read(reader) {
+        match SitemapsFile::read(reader) {
             Ok(sitemap) => match build_output(sitemap, &cli) {
                 Ok(output) => println!("{}", output.trim_end()),
                 Err(err) => println!("{}", err.to_string()),

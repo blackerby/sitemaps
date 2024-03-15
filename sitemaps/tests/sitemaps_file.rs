@@ -4,7 +4,7 @@ use chrono::prelude::*;
 use sitemaps::error::Error;
 use sitemaps::sitemap::{ChangeFreq, Priority};
 use sitemaps::w3c_datetime::W3CDateTime;
-use sitemaps::Sitemaps;
+use sitemaps::SitemapsFile;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -13,8 +13,8 @@ fn test_parse_sitemap() -> Result<(), Error> {
     let file = File::open("tests/data/example_1_url.xml")?;
     let reader = BufReader::new(file);
 
-    let sitemap = match Sitemaps::read(reader)? {
-        Sitemaps::Sitemap(sitemap) => sitemap,
+    let sitemap = match SitemapsFile::read(reader)? {
+        SitemapsFile::Sitemap(sitemap) => sitemap,
         _ => unreachable!(),
     };
     assert_eq!(sitemap.namespace, sitemaps::NAMESPACE);
@@ -37,8 +37,8 @@ fn test_parse_sitemap_index() -> Result<(), Error> {
     let file = File::open("tests/data/sitemap_index.xml")?;
     let reader = BufReader::new(file);
 
-    let sitemap_index = match Sitemaps::read(reader)? {
-        Sitemaps::SitemapIndex(sitemapindex) => sitemapindex,
+    let sitemap_index = match SitemapsFile::read(reader)? {
+        SitemapsFile::SiteIndex(sitemapindex) => sitemapindex,
         _ => unreachable!(),
     };
     assert_eq!(sitemap_index.namespace, sitemaps::NAMESPACE);

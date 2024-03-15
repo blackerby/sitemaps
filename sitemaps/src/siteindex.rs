@@ -1,4 +1,4 @@
-use crate::{Entries, SitemapWrite, SitemapsEntry, NAMESPACE};
+use crate::{Entries, Sitemaps, SitemapsEntry, NAMESPACE};
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, Event};
 use quick_xml::{Reader, Writer};
 use serde::Serialize;
@@ -7,28 +7,18 @@ use std::io::BufRead;
 
 use crate::error::Error;
 use crate::w3c_datetime::W3CDateTime;
-use crate::SitemapRead;
 
 #[derive(Debug, Default, PartialEq, Serialize)]
-pub struct SitemapIndex {
+pub struct SiteIndex {
     pub entries: Vec<SitemapEntry>,
     pub schema_instance: Option<String>,
     pub schema_location: Option<String>,
     pub namespace: String,
 }
 
-impl SitemapIndex {
-    pub fn new() -> Self {
-        Self {
-            entries: vec![],
-            schema_location: None,
-            schema_instance: None,
-            namespace: String::new(),
-        }
-    }
-}
+impl SiteIndex {}
 
-impl Entries for SitemapIndex {
+impl Entries for SiteIndex {
     fn locs(&self) -> Vec<String> {
         self.entries
             .iter()
@@ -73,14 +63,23 @@ impl SitemapsEntry for SitemapEntry {
     }
 }
 
-impl SitemapRead for SitemapIndex {
+impl Sitemaps for SiteIndex {
+    fn new() -> Self {
+        Self {
+            entries: vec![],
+            schema_location: None,
+            schema_instance: None,
+            namespace: String::new(),
+        }
+    }
+
     fn read_from<R: BufRead>(reader: R) -> Result<Self, Error> {
         let mut reader = Reader::from_reader(reader);
         reader.trim_text(true).expand_empty_elements(true);
 
         let mut buf = Vec::new();
         let mut nested_buf = Vec::new();
-        let mut sitemap_index = SitemapIndex::new();
+        let mut sitemap_index = SiteIndex::new();
 
         let mut entry = SitemapEntry::new();
         let mut entry_count: u32 = 0;
@@ -152,9 +151,6 @@ impl SitemapRead for SitemapIndex {
 
         Ok(sitemap_index)
     }
-}
-
-impl SitemapWrite for SitemapIndex {
     fn write<W: Write>(&self, mut writer: Writer<W>) -> Result<W, Error> {
         writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("UTF-8"), None)))?;
 

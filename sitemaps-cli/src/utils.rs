@@ -2,7 +2,7 @@ use crate::cli::Cli;
 use comfy_table::Table;
 use csv::Writer;
 use serde_json;
-use sitemaps::{Entries, Sitemaps};
+use sitemaps::{Entries, SitemapsFile};
 use std::{error::Error, io::Write};
 use tabwriter::TabWriter;
 
@@ -10,7 +10,7 @@ const HEADERS: [&str; 4] = ["loc", "lastmod", "changefreq", "priority"];
 
 // TODO: move this serialization logic into the library and out of the cli
 // challenge will be removing the dependency on the Cli struct
-pub(crate) fn build_output(sitemap: Sitemaps, cli: &Cli) -> Result<String, serde_json::Error> {
+pub(crate) fn build_output(sitemap: SitemapsFile, cli: &Cli) -> Result<String, serde_json::Error> {
     if cli.json {
         return serde_json::to_string_pretty(&sitemap);
     }
@@ -79,7 +79,7 @@ fn transpose_columns(columns: Vec<Vec<String>>) -> Vec<Vec<String>> {
 }
 
 fn build_headers_and_columns(
-    sitemap: &Sitemaps,
+    sitemap: &SitemapsFile,
     cli: &Cli,
 ) -> (Vec<&'static str>, Vec<Vec<String>>) {
     let mut headers = vec![];
@@ -95,7 +95,7 @@ fn build_headers_and_columns(
         let lastmods = sitemap.lastmods();
         columns.push(lastmods);
     }
-    if let Sitemaps::Sitemap(sitemap) = sitemap {
+    if let SitemapsFile::Sitemap(sitemap) = sitemap {
         if cli.changefreq && sitemap.entries.iter().any(|url| url.change_freq.is_some()) {
             headers.push(HEADERS[2]);
             let changefreqs = sitemap
