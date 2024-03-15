@@ -1,3 +1,15 @@
+//! Read and write files in the [Sitemaps XML format](https://sitemaps.org/protocol.html)
+//!
+//! ```rust
+//! use std::fs::File;
+//! use std::io::BufReader;
+//! use sitemaps::SitemapsFile;
+//!
+//! let file = File::open("tests/data/example_1_url.xml").unwrap();
+//! let reader = BufReader::new(file);
+//! let sitemap = SitemapsFile::read(reader).unwrap();
+//! ```
+
 use std::io::{BufRead, BufReader};
 
 use quick_xml::events::{BytesDecl, BytesEnd, BytesStart, BytesText, Event};
@@ -19,10 +31,11 @@ pub mod w3c_datetime;
 pub const NAMESPACE: &str = "http://www.sitemaps.org/schemas/sitemap/0.9";
 pub const MAX_URL_LENGTH: usize = 2048;
 
-/// A type representing Sitemaps.
-/// Sitemaps are one of:
-/// - a Sitemap
-/// - a SiteIndex
+/// A type representing the data in a sitemap file.
+///
+/// A SitemapsFile is one of:
+/// - a Sitemap, representing sitemap.xml files with `<urlset>` as the root element
+/// - a SiteIndex, representing sitemap.xml files with `<sitemapindex>` as the root element
 #[derive(Serialize)]
 pub enum SitemapsFile {
     Sitemap(Sitemap),
@@ -66,6 +79,7 @@ impl SitemapsFile {
     }
 }
 
+/// A trait containing the behavior [`Sitemap`s](Sitemap) and [`SiteIndex`es](SiteIndex).
 pub trait Sitemaps {
     fn new() -> Self;
     fn read_from<R: BufRead>(reader: R) -> Result<Self, Error>
@@ -112,15 +126,15 @@ pub trait Sitemaps {
 
 /// A trait to support entries in sitemap and sitemap index files. In a sitemap file,
 /// an entry is indicated by a `<url>` element. In a sitemap index file, an entry is
-/// indicated by a `<sitemap>` element. Both elements have a required ``<loc>`` child element
-/// and an optional ``<lastmod>`` element.
+/// indicated by a `<sitemap>` element. Both elements have a required `<loc>` child element
+/// and an optional `<lastmod>` element.
 pub trait SitemapsEntry {
-    /// Return the text value of the entry's ``<loc>`` element, a URL.
+    /// Return the text value of the entry's `<loc>` element, a URL.
     fn loc(&self) -> String;
-    /// Return the value of the entry's ``<lastmod>`` element as a
+    /// Return the value of the entry's `<lastmod>` element as a
     /// formatted date string.
     fn last_mod(&self) -> String;
-    /// Validate the URL contained in the entry's ``<loc>`` element.
+    /// Validate the URL contained in the entry's `<loc>` element.
     fn validate_loc(&self) -> Result<String, Error> {
         if self.loc().chars().count() > MAX_URL_LENGTH {
             return Err(Error::UrlValueTooLong);
