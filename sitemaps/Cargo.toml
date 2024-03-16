@@ -7,7 +7,7 @@ description = "Read and write files in the Sitemaps XML format"
 repository = "https://github.com/blackerby/sitemaps-rs"
 homepage = "https://github.com/blackerby/sitemaps-rs"
 license = "MIT"
-keywords = ["sitemaps", "sitemap", "sitemapindex", "reader", "parser", "xml"]
+keywords = ["sitemaps", "sitemap", "reader", "parser", "xml"]
 rust-version = "1.61.0"
 
 [dependencies]
