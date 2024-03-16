@@ -9,7 +9,6 @@
 
 - [ ] Write README (learn how to do this in `lib.rs`)
 
-
 ### CLI
 
 - [ ] test with `assert_cmd`
