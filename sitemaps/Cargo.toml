@@ -2,6 +2,11 @@
 name = "sitemaps"
 version = "0.1.0"
 edition = "2021"
+authors = ["William Blackerby <wmblackerby@gmail.com"]
+description = "Read and write files in the Sitemaps XML format"
+respository = "https://github.com/blackerby/sitemaps-rs"
+license = "MIT"
+keywords = ["sitemaps", "sitemap", "sitemapindex", "reader", "parser", "xml"]
 
 [dependencies]
 chrono = {version = "0.4.34", features = ["alloc", "serde"] }
