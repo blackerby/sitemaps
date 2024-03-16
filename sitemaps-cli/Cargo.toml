@@ -3,6 +3,13 @@ name = "sitemaps-cli"
 version = "0.1.0"
 edition = "2021"
 default-run = "sitemaps"
+authors = ["William Blackerby <wmblackerby@gmail.com"]
+description = "CLI for working with Sitemaps as data"
+repository = "https://github.com/blackerby/sitemaps-rs"
+homepage = "https://github.com/blackerby/sitemaps-rs"
+license = "MIT"
+keywords = ["sitemaps", "sitemap", "data", "cli", "xml"]
+rust-version = "1.61.0"
 
 [dependencies]
 clap = { version = "4.5.1", features = ["derive"] }
