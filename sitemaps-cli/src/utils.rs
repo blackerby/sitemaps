@@ -1,4 +1,5 @@
 use crate::cli::Cli;
+use comfy_table::presets::ASCII_MARKDOWN;
 use comfy_table::Table;
 use csv::Writer;
 use serde_json;
@@ -22,11 +23,30 @@ pub(crate) fn build_output(sitemap: SitemapsFile, cli: &Cli) -> Result<String, s
         return Ok(write_csv(headers, rows).unwrap());
     }
 
+    if cli.markdown {
+        return Ok(markdown(headers, rows, cli.header));
+    }
+
     if cli.pretty {
         Ok(pretty(headers, rows, cli.header))
     } else {
         Ok(plain(headers, rows, cli.header))
     }
+}
+
+fn markdown(headers: Vec<&str>, rows: Vec<Vec<String>>, show_header: bool) -> String {
+    let mut table = Table::new();
+    table.load_preset(ASCII_MARKDOWN);
+
+    if show_header {
+        table.set_header(headers);
+    }
+
+    for row in rows {
+        table.add_row(row);
+    }
+
+    format!("{table}")
 }
 
 fn pretty(headers: Vec<&str>, rows: Vec<Vec<String>>, show_header: bool) -> String {
