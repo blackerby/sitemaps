@@ -32,4 +32,7 @@ pub(crate) struct Cli {
     /// Print output as CSV.
     #[arg(short = 'C', long)]
     pub csv: bool,
+    /// Print output as Markdown.
+    #[arg(short = 'm', long)]
+    pub markdown: bool,
 }
