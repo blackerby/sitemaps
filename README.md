@@ -9,6 +9,7 @@ sitemaps-rs is:
   - a formatted table
   - CSV
   - JSON
+  - Markdown
 
 sitemaps-rs is currently experimental, a work in progress, &c
 
