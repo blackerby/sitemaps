@@ -1,12 +1,13 @@
 use chrono::{DateTime, FixedOffset, NaiveDate, ParseError};
+use serde::ser::Serializer;
 use serde::Serialize;
 use std::fmt;
 
 /// A W3CDateTime is an ISO-8601 date or an RFC-3339 datetime.
-#[derive(Debug, PartialEq, Clone, Copy, Serialize)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum W3CDateTime {
-    DateTime(DateTime<FixedOffset>, bool, bool),
     Date(NaiveDate),
+    DateTime(DateTime<FixedOffset>, bool, bool),
 }
 
 impl W3CDateTime {
@@ -28,6 +29,18 @@ impl W3CDateTime {
                 string.contains('.'),
                 string.to_uppercase().ends_with('Z'),
             ))
+        }
+    }
+}
+
+impl Serialize for W3CDateTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match *self {
+            Self::Date(ref d) => Ok(serializer.serialize_str(d.to_string().as_str()))?,
+            Self::DateTime(ref dt, _, _) => Ok(serializer.serialize_str(dt.to_string().as_str())?),
         }
     }
 }
